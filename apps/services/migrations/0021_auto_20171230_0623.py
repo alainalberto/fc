@@ -25,15 +25,15 @@ class Migration(migrations.Migration):
             name='users',
         ),
         migrations.RemoveField(
-            model_name='maintenance',
+            model_name='contract',
             name='contracts',
         ),
         migrations.RemoveField(
-            model_name='maintenance',
+            model_name='contract',
             name='customers',
         ),
         migrations.RemoveField(
-            model_name='maintenance',
+            model_name='contract',
             name='users',
         ),
         migrations.RemoveField(

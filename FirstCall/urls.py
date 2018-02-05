@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^accounts/login/', login, {'template_name':'Login/login.html'}, name='login'),
     url(r'^logout/', logout_then_login, name='logout'),
     url(r'^chat/$', login_required(Chats), name='chat'),
+    url(r'^application/', include('apps.logistic.urls', namespace='application')),
     url(r'^post/$', login_required(Post), name='post'),
     url(r'^message/$', login_required(Message), name='message'),
 ]

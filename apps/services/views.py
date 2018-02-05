@@ -341,7 +341,7 @@ class FormDelete(DeleteView):
 
 class FolderView(ListView):
     model = File
-    template_name = 'services/folder/folderViews.html'
+    template_name = 'services/folder/contractViews.html'
 
     def get_context_data(self, **kwargs):
         context = super(FolderView, self).get_context_data(**kwargs)
@@ -364,7 +364,7 @@ class FolderCreate(CreateView):
                 ],
         extra=10
     )
-    template_name = 'services/folder/folderForm.html'
+    template_name = 'services/folder/contractForm.html'
 
 
     def get(self, request, *args, **kwargs):
@@ -401,7 +401,7 @@ class FolderCreate(CreateView):
 
 class FolderEdit(UpdateView):
     model = File
-    template_name = 'services/folder/folderForm.html'
+    template_name = 'services/folder/contractForm.html'
     form_class = FileForm
 
     def get_context_data(self, **kwargs):
@@ -1641,6 +1641,184 @@ class AuditDelete(DeleteView):
         audit.delete()
         messages.success(request, "Audit delete with an extension")
         return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
+
+def ContractView(request, pk, popup):
+    contract = Contract.objects.get(id_con=pk)
+    return render(request, 'services/contract/contractView.html',
+                  {'contract': contract, 'is_popup': popup, 'title': 'Contract', 'deactivate': True})
+
+class ContractCreate(CreateView):
+    model = Contract
+    template_name = 'services/contract/contractForm.html'
+    form_class = ContractForm
+    form_file_class = FileForm
+
+    def get(self, request, *args, **kwargs):
+        if kwargs.__contains__('popup'):
+            popup = kwargs['popup']
+            id = kwargs['pk']
+        else:
+            popup = 0
+        customer = Customer.objects.filter(deactivated=False).order_by('company_name')
+        form = self.form_class()
+        form_file = self.form_file_class()
+        return render(request, self.template_name,
+                      {'form': form, 'customers': customer, 'is_popup': popup, 'title': 'Create Contract', 'form2':form_file})
+
+    def post(self, request, *args, **kwargs):
+        if kwargs.__contains__('popup'):
+            popup = kwargs['popup']
+            id = kwargs['pk']
+        else:
+            popup = 0
+        form = self.form_class(request.POST)
+        form_file = self.form_file_class(request.POST, request.FILES)
+        if form.is_valid() and form_file.is_valid():
+            contract = form.save(commit=False)
+            file = form_file.save(commit=False)
+            if popup:
+                customer = Customer.objects.get(id_cut=id)
+            else:
+                customer = Customer.objects.get(id_cut=request.POST['customers'])
+            file.folders = customer.folders
+            file.users = request.user
+            file.save()
+            contract.customers = customer
+            contract.users = request.user
+            contract.files = file
+            contract.update = datetime.now().strftime("%Y-%m-%d")
+            contract.save()
+            if request.POST.get('end_alert', False) and len(request.POST['end_date']) != 0:
+                group_admin = Group.objects.get(name='System Administrator')
+                group_manag = Group.objects.get(name='System Manager')
+                group_offic = Group.objects.get(name='Office Specialist')
+                dateExp = contract.end_date
+                dateShow = dateExp - timedelta(days=30)
+
+                alert = Alert.objects.create(
+                    category="Urgents",
+                    description="The client's " + str(contract.type) + " contract ("+contract.serial+") " + str(customer) + " expires ",
+                    create_date=datetime.now().strftime("%Y-%m-%d"),
+                    show_date=dateShow.strftime("%Y-%m-%d"),
+                    end_date=dateExp.strftime("%Y-%m-%d"),
+                    users=request.user)
+                alert.group.add(group_admin, group_manag, group_offic)
+            accion_user(contract, ADDITION, request.user)
+            messages.success(request, 'The Contract was saved successfully')
+            return HttpResponseRedirect('/accounting/customers/view/' + str(contract.customers_id))
+        else:
+            for er in form.errors:
+                messages.error(request, "ERROR: " + er)
+            return self.get(request)
+
+
+class ContractEdit(UpdateView):
+    model = Contract
+    template_name = 'services/contract/contractForm.html'
+    form_class = ContractForm
+    form_file_class = FileForm
+
+    def get_context_data(self, **kwargs):
+        context = super(ContractEdit, self).get_context_data(**kwargs)
+        if self.kwargs.__contains__('popup'):
+            popup = self.kwargs.get('popup')
+        else:
+            popup = 0
+        pk = self.kwargs.get('pk', 0)
+        contract = self.model.objects.get(id_con=pk)
+        file = File.objects.get(id_fil=contract.files_id)
+        if 'form' not in context:
+            context['form'] = self.form_class(instance=contract)
+        if 'form2' not in context:
+            context['form2'] = self.form_file_class(instance=file)
+        context['id'] = pk
+        context['is_popup'] = popup
+        context['title'] = 'Edit Contract'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object
+        pk = kwargs['pk']
+        if kwargs.__contains__('popup'):
+            popup = kwargs['popup']
+        else:
+            popup = 0
+        contract = self.model.objects.get(id_con=pk)
+        file = File.objects.get(id_fil=contract.files_id)
+        form = self.form_class(request.POST, instance=contract)
+        form_file = self.form_file_class(request.POST, request.FILES, instance=file)
+        if form.is_valid() and form_file.is_valid():
+            contract = form.save(commit=False)
+            file = form_file.save(commit=False)
+            if popup:
+                customer = Customer.objects.get(id_cut=id)
+            else:
+                customer = Customer.objects.get(id_cut=request.POST['customers'])
+            file.folders = customer.folders
+            file.save()
+            contract.customers = customer
+            contract.users = request.user
+            contract.files = file
+            contract.update = datetime.now().strftime("%Y-%m-%d")
+            contract.save()
+            if request.POST.get('end_alert', False) and len(request.POST['end_date']) != 0:
+                dateExp = contract.end_date
+                dateShow = dateExp - timedelta(days=30)
+                alert = Alert.objects.filter(
+                    category="Urgents",
+                    description="The client's "+str(contract.type)+" contract ("+contract.serial+") "+str(customer)+" expires ")
+                if alert:
+                    alert.update(show_date=dateShow.strftime("%Y-%m-%d"), end_date=dateExp.strftime("%Y-%m-%d"))
+                else:
+                    group_admin = Group.objects.get(name='System Administrator')
+                    group_manag = Group.objects.get(name='System Manager')
+                    group_offic = Group.objects.get(name='Office Specialist')
+                    alert = Alert.objects.create(
+                        category="Urgents",
+                        description="The client's " + str(contract.type) + " contract ("+contract.serial+") " + str(customer) + " expires ",
+                        create_date=datetime.now().strftime("%Y-%m-%d"),
+                        show_date=dateShow.strftime("%Y-%m-%d"),
+                        end_date=dateExp.strftime("%Y-%m-%d"),
+                        users=request.user)
+                    alert.group.add(group_admin, group_manag, group_offic)
+            else:
+                alert = Alert.objects.filter(
+                    category="Urgents",
+                    description="The client's " + str(contract.type) + " contract ("+contract.serial+") " + str(customer) + " expires ")
+                if alert:
+                    for a in alert:
+                        a.delete()
+            accion_user(contract, CHANGE, request.user)
+            messages.success(request, 'The Audit was saved successfully')
+            return HttpResponseRedirect('/accounting/customers/view/' + str(contract.customers_id))
+        else:
+            for er in form.errors:
+                messages.error(request, "ERROR: " + er)
+            return render(request, self.template_name,
+                          {'form': form, 'is_popup': popup, 'title': 'Edit Audit'})
+
+
+class ContractDelete(DeleteView):
+    model = Contract
+    template_name = 'confirm_delete.html'
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object
+        id = kwargs['pk']
+        contract = self.model.objects.get(id_con=id)
+        customer = contract.customers
+        alert = Alert.objects.filter(
+            category="Urgents",
+            description="The client's " + str(contract.type) + " contract (" + contract.serial + ") " + str(
+                customer) + " expires ")
+        if alert:
+            for a in alert:
+                a.delete()
+        accion_user(contract, DELETION, request.user)
+        contract.delete()
+        messages.success(request, "Audit delete with an extension")
+        return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
+
 
 def EmailSend(request, pk, fl):
 

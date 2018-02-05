@@ -46,23 +46,34 @@ urlpatterns = [
     url(r'^insurance/view/(?P<pk>\d+)&(?P<popup>[^/]+)/$', login_required(permission_required('services.add_insurance')(InsuranceView)), name='insurance'),
     url(r'^insurance/create$', login_required(permission_required('services.add_insurance')(InsuranceCreate.as_view())), name='insurance_create'),
     url(r'^insurance/edit/(?P<pk>\d+)/$', login_required(permission_required('services.change_insurance')(InsuranceEdit.as_view())), name='insurance_edit'),
+    url(r'^insurance/edit/(?P<pk>\d+)&(?P<popup>[^/]+)/$', login_required(permission_required('services.change_insurance')(InsuranceEdit.as_view())), name='insurance_edit'),
     url(r'^insurance/(?P<pk>\d+)/$', login_required(permission_required('services.delete_insurance')(InsuranceDelete.as_view())), name='insurance_delete'),
 
     #Driver
     url(r'^driver/view/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.add_driver')(DriverView)), name='driver'),
     url(r'^driver/create$', login_required(permission_required('services.add_driver')(DriverCreate.as_view())),name='driver_create'),
     url(r'^driver/edit/(?P<pk>\d+)/$',login_required(permission_required('services.change_driver')(DriverEdit.as_view())),name='driver_edit'),
+    url(r'^driver/edit/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.change_driver')(DriverEdit.as_view())),name='driver_edit'),
     url(r'^driver/(?P<pk>\d+)/$',login_required(permission_required('services.delete_driver')(DriverDelete.as_view())),name='driver_delete'),
 
     #Ifta
     url(r'^ifta/view/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.add_ifta')(IftaView)), name='ifta'),
     url(r'^ifta/create$', login_required(permission_required('services.add_ifta')(IftaCreate.as_view())), name='ifta_create'),
     url(r'^ifta/edit/(?P<pk>\d+)/$',login_required(permission_required('services.change_ifta')(IftaEdit.as_view())), name='ifta_edit'),
+    url(r'^ifta/edit/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.change_ifta')(IftaEdit.as_view())), name='ifta_edit'),
     url(r'^ifta/(?P<pk>\d+)/$', login_required(permission_required('services.delete_ifta')(IftaDelete.as_view())), name='ifta_delete'),
 
     #Audit
     url(r'^audit/view/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.add_audit')(AuditView)), name='audit'),
     url(r'^audit/create$', login_required(permission_required('services.add_audit')(AuditCreate.as_view())),name='audit_create'),
     url(r'^audit/edit/(?P<pk>\d+)/$',login_required(permission_required('services.change_audit')(AuditEdit.as_view())),name='audit_edit'),
+    url(r'^audit/edit/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.change_audit')(AuditEdit.as_view())),name='audit_edit'),
     url(r'^audit/(?P<pk>\d+)/$',login_required(permission_required('services.delete_audit')(AuditDelete.as_view())),name='audit_delete'),
+
+    #Contract
+    url(r'^contract/view/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.add_contract')(ContractView)), name='contract'),
+    url(r'^contract/create$', login_required(permission_required('services.add_contract')(ContractCreate.as_view())),name='contract_create'),
+    url(r'^contract/edit/(?P<pk>\d+)/$',login_required(permission_required('services.change_contract')(ContractEdit.as_view())),name='contract_edit'),
+    url(r'^contract/edit/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.change_contract')(ContractEdit.as_view())),name='contract_edit'),
+    url(r'^contract/(?P<pk>\d+)/$',login_required(permission_required('services.delete_contract')(ContractDelete.as_view())),name='contract_delete'),
 ]

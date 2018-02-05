@@ -154,17 +154,10 @@ class ContractForm(forms.ModelForm):
             'end_date',
             'type',
             'state',
-            'customers'
+            'customers',
+
 
         ]
-        labels = {
-            'description': 'Description:',
-            'serial' : 'Serial',
-            'start_date': 'Start Date:',
-            'end_date': 'End Date:',
-            'type': 'Type',
-
-        }
         widgets = {
             'description': forms.TextInput(attrs={'placeholder': 'State', 'class': 'form-control input-md'}),
             'serial': forms.TextInput(attrs={'placeholder': 'State', 'class': 'form-control input-md'}),
@@ -228,7 +221,7 @@ class FileForm(forms.ModelForm):
         ]
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'name', 'class': 'form-control input-md upper'}),
-            'category': forms.Select(attrs={'class': 'form-control input-md'}, choices=(('', '---------'),('Company', 'Company'),('Accidents', 'Accidents'), ('COI', 'COI'),('Insurance', 'Insurance'), ('Endorsments', 'Endorsments'), ('Misselenious', 'Misselenious'), ('Permit', 'Permit'), ('Quote', 'Quote'))),
+            'category': forms.Select(attrs={'class': 'form-control input-md'}, choices=(('', '---------'),('Company', 'Company'),('Accidents', 'Accidents'), ('COI', 'COI'),('Insurance', 'Insurance'), ('Endorsments', 'Endorsments'), ('Misselenious', 'Misselenious'), ('Permit', 'Permit'), ('Quote', 'Quote'), ('Audit', 'Audit'), ('Contract', 'Contract'))),
             'url': forms.FileInput(),
         }
 

@@ -27,15 +27,15 @@
 
     <link href="{% static 'css/app.css'%}" rel="stylesheet">
 
-    <!-- Morris Charts CSS -->
-    <link href="{% static 'lib/morris/morris.css'%}" rel="stylesheet">
+
 
     <!-- Custom Fonts -->
     <link href="{% static 'css/font-awesome/css/font-awesome.min.css'%}" rel="stylesheet" type="text/css">
 
     <link rel="icon" type="image/ico" href="{% static '/img/icon/Icon.ico'%}">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-
+    <!-- Morris Charts CSS -->
+    <link href="{% static 'lib/morris/morris.css'%}" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -277,6 +277,11 @@
                             <a class="item" href="{% url 'services:audit_create' %}"> Audits</a>
                         </li>
                         {% endif %}
+                        {% if perms.services.add_contract %}
+                        <li>
+                            <a class="item" href="{% url 'services:contract_create' %}"> Contracts</a>
+                        </li>
+                        {% endif %}
                         {% if perms.services.add_equipment %}
                         <li>
                             <a class="item" href="{% url 'services:equipment_create' %}"> Equipment</a>
@@ -339,6 +344,11 @@
                         <li>
                             <a class="ui item" href="/admin"> Administration Panel</a>
                         </li>
+                        {% if perms.services.change_application %}
+                        <li>
+                            <a class="item" href="{% url 'application:apply_views' %}"> Applicaton Drivers</a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </li>
                 {% endif %}

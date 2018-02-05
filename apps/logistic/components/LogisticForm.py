@@ -1,5 +1,6 @@
 from django import forms
 from apps.logistic.models import *
+from apps.services.models import Application
 
 
 
@@ -158,4 +159,41 @@ class DieselForm(forms.ModelForm):
             'date_start': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'date_end': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'total': forms.NumberInput(attrs={'placeholder': 'Total', 'class': 'form-control input-md', 'required': 'true'}),
+        }
+
+class ApplicationForm(forms.ModelForm):
+    class Meta:
+        model = Application
+
+        fields = [
+            'fullname',
+            'company_name',
+            'address',
+            'phone',
+            'no_social',
+            'email',
+            'license_numb',
+            'usdot',
+            'mc',
+            'txdmv',
+            'ein',
+            'service',
+            'note',
+            'state',
+        ]
+        widgets = {
+            'fullname': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'company_name': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'address': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'phone': forms.NumberInput(attrs={'class': 'form-control input-md upper'}),
+            'no_social': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control input-md upper'}),
+            'license_numb': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'usdot': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'mc': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'txdmv': forms.TextInput(attrs={ 'class': 'form-control input-md upper'}),
+            'ein': forms.TextInput(attrs={'class': 'form-control input-md upper'}),
+            'service': forms.NumberInput(attrs={'class': 'form-control input-md upper'}),
+            'note': forms.Textarea(attrs={'class': 'form-control input-md upper'}),
+            'state':forms.Select(attrs={'class': 'form-control input-md'}, choices=(('Request','Request'), ('Viewed','Viewed'),('Approved','Approved'),('Rejected','Rejected'),)),
         }

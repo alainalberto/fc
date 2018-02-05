@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=20, null=True),
         ),
         migrations.AddField(
-            model_name='maintenance',
+            model_name='contract',
             name='state',
             field=models.CharField(blank=True, max_length=20, null=True),
         ),

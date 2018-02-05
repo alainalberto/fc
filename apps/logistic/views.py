@@ -9,6 +9,7 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from FirstCall.util import accion_user
 from apps.logistic.models import *
 from apps.tools.models import Folder, Busines, File, Alert
+from apps.services.models import Application
 from datetime import datetime, date, time, timedelta
 
 # Create your views here.
@@ -478,4 +479,87 @@ class DieselDelete(DeleteView):
         accion_user(diesel, DELETION, request.user)
         diesel.delete()
         messages.success(request, "Diesel Report delete with an extension")
+        return HttpResponseRedirect(self.success_url)
+
+#Application
+
+class ApplicationViews(ListView):
+    model = Application
+    template_name = 'logistic/application/aplicationViews.html'
+
+class ApplicationCreate(CreateView):
+     model = Application
+     form_class = ApplicationForm
+     template_name = 'logistic/application/aplicationForm.html'
+
+     def get(self, request, *args, **kwargs):
+         form = self.form_class()
+         return render(request, self.template_name, {'form': form, 'company': 'J&L 24/7 LLC'})
+
+     def post(self, request, *args, **kwargs):
+         form = self.form_class(request.POST)
+         if form.is_valid():
+            apply = form.save(commit=False)
+            apply.users = request.user
+            apply.date = datetime.now().strftime("%Y-%m-%d")
+            apply.update = datetime.now().strftime("%Y-%m-%d")
+            apply.state = 'Request'
+            apply.save()
+            accion_user(apply, ADDITION, request.user)
+            if request.POST.get('leng', False):
+               messages.success(request, 'Applicaction send with an extension!!!')
+            else:
+                messages.success(request, 'Aplicacion enviada con exito!!!')
+            return HttpResponseRedirect(reverse_lazy('home'))
+         else:
+             for er in form.errors:
+                 messages.error(request, "ERROR: " + er)
+             return self.get(request)
+
+class ApplicationEdit(UpdateView):
+    model = Application
+    form_class = ApplicationForm
+    template_name = 'logistic/application/aplicationForm.html'
+    success_url = reverse_lazy('application:apply_views')
+
+    def get_context_data(self, **kwargs):
+        context = super(ApplicationEdit, self).get_context_data(**kwargs)
+        if 'form' not in context:
+            context['form'] = self.form_class(self.request.GET)
+        context['id'] = self.kwargs.get('pk', 0)
+        context['title'] = 'Edit Application'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object
+        id = kwargs['pk']
+        apply = self.model.objects.get(id_apl=id)
+        form = self.form_class(request.POST, instance=apply)
+        if form.is_valid():
+            apply =form.save(commit=False)
+            if apply.state == 'Request':
+                apply.state = 'Viewed'
+            apply.update = datetime.now().strftime("%Y-%m-%d")
+            apply.save()
+
+            accion_user(apply, CHANGE, request.user)
+            messages.success(request, "Applicacion update with an extension")
+            return HttpResponseRedirect(self.success_url)
+        else:
+            for er in form.errors:
+                messages.error(request, "ERROR: "+er)
+            return render(request, self.template_name, {'form': form, 'title': 'Edit Diesel Report'})
+
+class ApplicationDelete(DeleteView):
+    model = Application
+    template_name = 'confirm_delete.html'
+    success_url = reverse_lazy('application:apply_views')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object
+        id = kwargs['pk']
+        apply = self.model.objects.get(id_apl=id)
+        accion_user(apply, DELETION, request.user)
+        apply.delete()
+        messages.success(request, "Application delete with an extension")
         return HttpResponseRedirect(self.success_url)

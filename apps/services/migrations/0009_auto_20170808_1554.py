@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='maintenance',
+            model_name='contract',
             name='update',
             field=models.DateField(blank=True, null=True),
         ),

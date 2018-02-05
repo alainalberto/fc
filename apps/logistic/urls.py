@@ -5,6 +5,13 @@ from apps.logistic.views import *
 
 urlpatterns = [
 
+    #Application
+    url(r'^$', ApplicationCreate.as_view(), name='apply'),
+    url(r'^views/$', login_required(permission_required('services.add_application')(ApplicationViews.as_view())), name='apply_views'),
+    url(r'^edit/(?P<pk>\d+)/$', login_required(permission_required('services.change_application')(ApplicationEdit.as_view())), name='apply_edit'),
+    url(r'^delete/(?P<pk>\d+)/$', login_required(permission_required('services.delete_application')(ApplicationDelete.as_view())), name='apply_delete'),
+
+
     # Load
     url(r'^loads/$', login_required(permission_required('logistic.add_load')(LoadsView.as_view())), name='loads'),
     url(r'^loads/create$', login_required(permission_required('logistic.add_load')(LoadsCreate.as_view())), name='load_create'),

@@ -97,7 +97,7 @@ class Contract(models.Model):
     objects= CountState()
 
     def __str__(self):
-        return '{} {}'.format(self.serial, self.customer)
+        return '{} {}'.format(self.type, self.serial)
 
 class Audit(models.Model):
     id_aud = models.AutoField(primary_key=True)
@@ -207,10 +207,10 @@ class Application(models.Model):
     no_social = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(max_length=255)
     license_numb = models.CharField(max_length=45, blank=True, null=True)
-    usdot = models.IntegerField(blank=True, null=True)
-    mc = models.IntegerField(blank=True, null=True)
-    txdmv = models.IntegerField(blank=True, null=True)
-    ein = models.IntegerField(blank=True, null=True)
+    usdot = models.CharField(max_length=25, blank=True, null=True)
+    mc = models.CharField(max_length=25, blank=True, null=True)
+    txdmv = models.CharField(max_length=25, blank=True, null=True)
+    ein = models.CharField(max_length=25, blank=True, null=True)
     service = models.CharField(max_length=255, blank=True, null=True)
     note = models.CharField(max_length=255, blank=True, null=True)
     date_view = models.DateTimeField(blank=True, null=True)
