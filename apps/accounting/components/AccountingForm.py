@@ -128,7 +128,7 @@ class EmployeesForm(forms.ModelForm):
             'phone': 'Phone:',
             'email': 'Email:',
             'type_salary': 'Salary Type:',
-            'value': 'Percent / Value per hour:',
+            'value': 'Percent / Value per hour / Salary:',
             'position': 'Position:',
             'deactivated': 'Deactivated:',
         }
@@ -141,7 +141,7 @@ class EmployeesForm(forms.ModelForm):
             'date_admis': forms.DateInput(attrs={'placeholder': 'Admission Date', 'class': 'form-control input-md upper'}),
             'phone': forms.NumberInput(attrs={'placeholder': 'Phone', 'class': 'form-control input-md'}),
             'email': forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'form-control input-md lower', 'required': 'true'}),
-            'type_salary': forms.Select(attrs={'class': 'form-control input-md'},choices=(('pervent','Commission'),('salary','Salary'))),
+            'type_salary': forms.Select(attrs={'class': 'form-control input-md'},choices=(('commission','Commission'),('salary','Salary'),('hour','Per Hour'))),
             'value': forms.NumberInput(attrs={'placeholder': 'Value', 'class': 'form-control input-md'}),
             'position': forms.TextInput(attrs={'placeholder': 'Position', 'class': 'form-control input-md upper'}),
             'deactivated': forms.CheckboxInput(attrs={'data-off-color':"danger", 'class':"switch", 'data-size':"mini", 'data-on-text':"YES", 'data-off-text': "NO"}),
@@ -273,6 +273,7 @@ class PaymentForm(forms.ModelForm):
                 'value',
                 'waytopay',
                 'note',
+                'paid'
             ]
             widgets = {
                 'business': forms.Select(attrs={'class': 'form-control input-md'}),
@@ -286,6 +287,9 @@ class PaymentForm(forms.ModelForm):
                 'waytopay': forms.Select(attrs={'class': 'form-control input-md'},
                                          choices=(('Cash', 'Cash'), ('Check', 'Check'), ('Credit Card', 'Credit Card'))),
                 'note': forms.Textarea(attrs={'class': 'form-control input-md upper'}),
+                'paid': forms.CheckboxInput(
+                    attrs={'data-off-color': "danger", 'class': "switch", 'data-size': "mini", 'data-on-text': "YES",
+                           'data-off-text': "NO"}),
             }
 
 

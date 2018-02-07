@@ -103,9 +103,9 @@ class DriversForm(forms.ModelForm):
             'ssn': forms.PasswordInput(attrs={'class': 'form-control input-md'}),
             'dob': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'lic_date_exp': forms.DateInput(attrs={'class': 'form-control input-md'}),
-            'medicard_date_exp': forms.DateTimeInput(attrs={'class': 'form-control input-md'}),
+            'medicard_date_exp': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'drugtest_date': forms.DateInput(attrs={'class': 'form-control input-md'}),
-            'drugtest_date_exp': forms.DateTimeInput(attrs={'class': 'form-control input-md'}),
+            'drugtest_date_exp': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'mbr_date': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'mbr_date_exp': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'begining_date': forms.DateInput(attrs={'class': 'form-control input-md'}),
@@ -139,7 +139,7 @@ class DispatchForm(forms.ModelForm):
             'address': forms.TextInput(attrs={'placeholder': 'Address', 'class': 'form-control input-md upper'}),
             'comission': forms.NumberInput(attrs={'placeholder': 'Porcent', 'class': 'form-control input-md', 'required': 'true'}),
             'deactivate': forms.CheckboxInput(attrs={'data-off-color':"danger", 'class':"switch", 'data-size':"mini", 'data-on-text':"YES", 'data-off-text': "NO"}),
-            'date_deactivated': forms.DateTimeInput(attrs={'class': 'form-control input-md'}),
+            'date_deactivated': forms.DateInput(attrs={'class': 'form-control input-md'}),
 
         }
 

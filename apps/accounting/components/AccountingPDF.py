@@ -705,24 +705,28 @@ def PayEmployeePDF(request, pk):
     p.drawString(30, 20, 'Date of printing '+time.strftime("%m/%d/%y %H:%M:%S")+' by %s' % request.user.first_name)
 
     #Boby
-    # Dispatch
+    # Employee
+    if employee.type_salary == 'commission':
+        sing = '%'
+    else:
+        sing = '$'
     p.setFillColor('#000000')
     p.setFont('Helvetica-Bold', 11)
     p.drawString(50, 550, 'Rate')
     p.setFont('Helvetica', 10)
-    p.drawString(50, 530, str(employee.value))
+    p.drawString(50, 530, sing+str(employee.value))
+    if employee.type_salary == 'hour':
+       p.setFillColor('#000000')
+       p.setFont('Helvetica-Bold', 11)
+       p.drawString(100, 550, 'Regular Hours')
+       p.setFont('Helvetica', 10)
+       p.drawString(100, 530, str(payment.regular_hours))
 
-    p.setFillColor('#000000')
-    p.setFont('Helvetica-Bold', 11)
-    p.drawString(100, 550, 'Regular Hours')
-    p.setFont('Helvetica', 10)
-    p.drawString(100, 530, str(payment.regular_hours))
-
-    p.setFillColor('#000000')
-    p.setFont('Helvetica-Bold', 11)
-    p.drawString(190, 550, 'Overtime Hours')
-    p.setFont('Helvetica', 10)
-    p.drawString(190, 530, str(payment.overtime_hours))
+       p.setFillColor('#000000')
+       p.setFont('Helvetica-Bold', 11)
+       p.drawString(190, 550, 'Overtime Hours')
+       p.setFont('Helvetica', 10)
+       p.drawString(190, 530, str(payment.overtime_hours))
 
     p.setFillColor('#58D3F7')
     p.roundRect(370, 500, 180, 20, 0, fill=1)

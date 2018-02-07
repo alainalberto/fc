@@ -13,11 +13,11 @@
  }
  $(document).ready( function () {
 
+{% if employee.type_salary == 'hour' %}
     $(function() {
        $("#id_accounts").chained("#id_business");
        cal();
     });
-
     function cal (){
        var regular = parseFloat($('#id_regular_hours').val()|| 0);
        var overtime = parseFloat($('#id_overtime_hours').val()|| 0);
@@ -29,6 +29,38 @@
        $('#gross').val(gross);
        $('#id_value').val(net);
     };
+  {% endif %}
+
+  {% if employee.type_salary == 'commission' %}
+    $(function() {
+       $("#id_accounts").chained("#id_business");
+       $('#gross').removeAttr("readonly");
+       cal();
+    });
+    function cal (){
+       var rate = parseFloat($('#rate').val()|| 0);
+       var discounts = parseFloat($('#id_discount').val()|| 0);
+       var gross = parseFloat($('#gross').val()|| 0);
+       var net = ((gross*rate)/100)-discounts
+       $('#id_value').val(net);
+    };
+  {% endif %}
+
+  {% if employee.type_salary == 'salary' %}
+    $(function() {
+       $("#id_accounts").chained("#id_business");
+       $('#gross').removeAttr("readonly");
+       $('#gross').val({{employee.value}});
+       cal();
+    });
+    function cal (){
+       var discounts = parseFloat($('#id_discount').val()|| 0);
+       var gross = parseFloat($('#gross').val()|| 0);
+       var net = gross-discounts
+       $('#id_value').val(net);
+    };
+  {% endif %}
+
    $("#id_regular_hours, #id_discount, #rate, #id_overtime_hours").on("change", function() {
        cal();
     });
@@ -94,6 +126,7 @@
                         <label class="label-control">Payment Method: </label>
                         {{ form.waytopay }}
                     </div>
+                    {% if employee.type_salary == 'hour' %}
                     <!-- Select Basic -->
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Regular Hours: </label>
@@ -103,10 +136,13 @@
                         <label class="label-control">Overtime Hours: </label>
                         {{ form.overtime_hours }}
                     </div>
+                    {% endif %}
+                    {% if employee.type_salary == 'hour' or employee.type_salary == 'commission' %}
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Rate: </label>
                         <input id="rate" type="number" name="rate" placeholder="0.00" value="{{employee.value}}" class="form-control">
                     </div>
+                    {% endif %}
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Gross Pay: </label>
                         <input id="gross" name="subtotal" type="number" placeholder="0.00" class="form-control" readonly>
@@ -119,45 +155,10 @@
                         <label class="label-control">Net Pay: </label>
                         {{ form.value }}
                     </div>
-
-                    <div class="modal fade" id="employeeList" tabindex="-1" role="dialog" aria-labelledby="ModalLabel">
-                        <div class="modal-dialog modal-lg" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title text-center"><strong>Employees List</strong></h4>
-                                </div>
-                                <div class="modal-body">
-                                    <table id="customer_table" class="table data-table">
-                                        <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th class="col-md-2">Business</th>
-                                            <th class="col-md-2">Name</th>
-                                            <th class="col-md-2">Last Name</th>
-                                            <th class="col-md-1">Action</th>
-
-                                            <th></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for e in employees %}
-                                        <tr>
-                                            <td style="display : none">{{e.id_emp}}</td>
-                                            <td>{{c.business}}</td>
-                                            <td>{{e.name}}</td>
-                                            <td>{{e.lastname}}</td>
-                                            <td>
-                                                <a type="button" class="btn btn-info btn_add_emp" data-dismiss="#employeeList">Add</a>
-                                            </td>
-                                            <td style="display : none">{{e.value}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                    <div class="form-group col-md-3 col-md-offset-8">
+                            <label class="label-control">Is Paid:</label>
+                                {{form.paid}}
                         </div>
-                    </div>
                 </fieldset>
                 <div class="form-group col-md-5 col-md-offset-4">
                     <input type="submit" class="btn btn-success" value="Save">

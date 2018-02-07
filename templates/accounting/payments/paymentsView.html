@@ -14,6 +14,9 @@
  $(document).ready( function () {
 
     $(function() {
+       {% if employee.type_salary == 'salary' %}
+       $('#gross').val({{employee.value}});
+       {% endif %}
         cal();
     });
 
@@ -62,16 +65,39 @@
     }
     {% endif %}
     {% if employee %}
-     function cal (){
-       var regular = {{ form.regular_hours }};
-       var overtime = {{ form.overtime_hours }};
-       var rate = $('#rate').val();
+     {% if employee.type_salary == 'hour' %}
+    function cal (){
+       var regular = parseFloat($('#id_regular_hours').val()|| 0);
+       var overtime = parseFloat($('#id_overtime_hours').val()|| 0);
+       var rate = parseFloat($('#rate').val()|| 0);
        var rateovertimer = rate*1.5
-       var discounts = {{ form.discount }};
+       var discounts = parseFloat($('#id_discount').val()|| 0);
        var gross = (regular*rate)+(overtime*rateovertimer)
+       var net = gross-discounts
        $('#gross').val(gross);
+       $('#id_value').val(net);
     };
-    {% endif %}
+  {% endif %}
+
+  {% if employee.type_salary == 'commission' %}
+    function cal (){
+       var rate = parseFloat($('#rate').val()|| 0);
+       var discounts = parseFloat($('#id_discount').val()|| 0);
+       var gross = parseFloat($('#gross').val()|| 0);
+       var net = ((gross*rate)/100)-discounts
+       $('#id_value').val(net);
+    };
+  {% endif %}
+
+  {% if employee.type_salary == 'salary' %}
+    function cal (){
+       var discounts = parseFloat($('#id_discount').val()|| 0);
+       var gross = parseFloat($('#gross').val()|| 0);
+       var net = gross-discounts
+       $('#id_value').val(net);
+    };
+  {% endif %}
+  {% endif %}
 
 });
 </script>
@@ -318,7 +344,7 @@
                             <label class="label-control">Commission to pay:</label>
                             <div class="input-group">
                                 <span class="input-group-addon">%</span>
-                                <input id="id_comission" type="text" name="comission" placeholder="0.00" class="form-control" value="{{dispatch.comission}}">
+                                <input id="id_comission" type="text" name="comission" placeholder="0.00" class="form-control" value="{{dispatch.comission}}" readonly>
                                 <span class="input-group-addon">$</span>
                                 <input id="id_comision_value" type="number" name="comission_value" placeholder="0.00" class="form-control" readonly>
                             </div>
@@ -347,7 +373,7 @@
             </div>
 
 {% endif %}
-{% if not driver and not dispatch %}
+{% if employee %}
 
 <div>
                     <div class="form-group col-md-3 col-md-offset-1">
@@ -376,7 +402,7 @@
                         <label class="label-control">Payment Method: </label>
                         {{ form.waytopay }}
                     </div>
-                    <!-- Select Basic -->
+                    {% if employee.type_salary == 'hour' %}
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Regular Hours: </label>
                         {{ form.regular_hours }}
@@ -385,13 +411,16 @@
                         <label class="label-control">Overtime Hours: </label>
                         {{ form.overtime_hours }}
                     </div>
+                    {% endif %}
+                    {% if employee.type_salary == 'hour' or employee.type_salary == 'commission' %}
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Rate: </label>
-                        <input id="rate" type="number" name="rate" placeholder="0.00" value="{{employee.value}}" class="form-control">
+                        <input id="rate" type="number" name="rate" placeholder="0.00" value="{{employee.value}}" class="form-control" readonly>
                     </div>
+                    {% endif %}
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Gross Pay: </label>
-                        <input id="gross" type="number" placeholder="0.00" class="form-control" readonly>
+                        <input id="gross" type="number" placeholder="0.00" class="form-control"  readonly>
                     </div>
                     <div class="form-group col-md-3 col-md-offset-1">
                         <label class="label-control">Discount: </label>
