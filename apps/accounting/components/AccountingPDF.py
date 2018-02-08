@@ -21,7 +21,7 @@ def Receipt_pdf(request, pk):
     #Header
     p.setFillColor('#2471A3')
     p.roundRect(0, 750, 694, 120, 20, fill=1)
-    p.drawImage('static/img/logoFCI.png', 250, 760, width=150, height=70)
+    p.drawImage('static/media/'+str(recpt.business.logo), 250, 760, width=150, height=70)
 
     p.setFont('Helvetica', 28)
     p.setFillColor('#34495E')
@@ -90,7 +90,7 @@ def Invoices_pdf(request, pk):
     #Header
     p.setFillColor('#2471A3')
     p.roundRect(0, 750, 694, 120, 20, fill=1)
-    p.drawImage('static/img/logoFCI.png', 250, 760, width=150, height=70)
+    p.drawImage('static/media/'+str(invoice.business.logo), 250, 760, width=150, height=70)
 
     p.setFont('Helvetica', 28)
     p.setFillColor('#E5E7E9')
@@ -212,7 +212,7 @@ def InvoicesLod_pdf(request, pk):
     #Header
     p.setFillColor('#2471A3')
     p.roundRect(0, 750, 694, 120, 20, fill=1)
-    p.drawImage('static/img/truck.jpg', 440, 760, width=150, height=70)
+    p.drawImage('static/media/'+str(business.logo), 440, 760, width=150, height=70)
 
     p.setFont('Helvetica', 16)
     p.setFillColor('#E5E7E9')
@@ -360,7 +360,7 @@ def PayDriverPDF(request, pk):
     # Header
     p.setFillColor('#2471A3')
     p.roundRect(0, 750, 694, 120, 20, fill=1)
-    p.drawImage('static/img/truck.jpg', 440, 760, width=150, height=70)
+    p.drawImage('static/media/'+str(business.logo), 440, 760, width=150, height=70)
 
     p.setFont('Helvetica', 16)
     p.setFillColor('#E5E7E9')
@@ -528,7 +528,7 @@ def PayDispatchPDF(request, pk):
     # Header
     p.setFillColor('#2471A3')
     p.roundRect(0, 750, 694, 120, 20, fill=1)
-    p.drawImage('static/img/truck.jpg', 440, 760, width=150, height=70)
+    p.drawImage('static/media/'+str(business.logo), 440, 760, width=150, height=70)
 
     p.setFont('Helvetica', 16)
     p.setFillColor('#E5E7E9')
@@ -662,7 +662,7 @@ def PayEmployeePDF(request, pk):
     #Header
     p.setFillColor('#2471A3')
     p.roundRect(0, 750, 694, 120, 20, fill=1)
-    p.drawImage('static/img/logoFCI.png', 250, 760, width=150, height=70)
+    p.drawImage('static/media/'+str(payment.business.logo), 250, 760, width=150, height=70)
 
     p.setFont('Helvetica', 16)
     p.setFillColor('#34495E')

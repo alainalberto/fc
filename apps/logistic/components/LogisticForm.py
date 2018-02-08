@@ -20,6 +20,7 @@ class LoadsForm(forms.ModelForm):
             'number',
             'paid',
             'note',
+            'other_company'
         ]
         labels = {
             'broker': 'Broker Name:',
@@ -40,12 +41,15 @@ class LoadsForm(forms.ModelForm):
             'pickup_date': forms.DateInput(attrs={'class': 'form-control input-md'}),
             'deliver': forms.TextInput(attrs={'placeholder': 'Deliver to', 'class': 'form-control input-md upper'}),
             'deliver_date': forms.DateInput(attrs={'class': 'form-control input-md'}),
-            'dispatch': forms.Select(attrs={'class': 'form-control input-md'}),
-            'driver': forms.Select(attrs={'class': 'form-control input-md'}),
+            'dispatch': forms.Select(attrs={'class': 'form-control input-md', 'required': 'true'}),
+            'driver': forms.Select(attrs={'class': 'form-control input-md', 'required': 'true'}),
             'value': forms.NumberInput(attrs={'placeholder': 'Value', 'class': 'form-control input-md'}),
             'number': forms.TextInput(attrs={'placeholder': 'Number', 'class': 'form-control input-md', 'required': 'true'}),
             'paid': forms.CheckboxInput(attrs={'data-off-color':"danger", 'class':"switch", 'data-size':"mini", 'data-on-text':"YES", 'data-off-text': "NO"}),
             'note': forms.Textarea(attrs={'class': 'form-control'}),
+            'other_company': forms.CheckboxInput(
+                attrs={'id': "id_other_company", 'data-toggle': "toggle", 'type': "checkbox", 'data-on': "Other Company",
+                       'data-off': "This Company"}),
 
         }
 

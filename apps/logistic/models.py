@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 from apps.accounting.models import Account, Invoice, InvoiceLoad, Fee, Payment
 
+from apps.services.models import Customer, Driver
+
 # Create your models here.
 
 
@@ -75,6 +77,7 @@ class Load(models.Model):
     value = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     number = models.CharField(max_length=20,blank=True, null=True)
     paid = models.BooleanField(default=False)
+    other_company = models.BooleanField(default=False)
     note = models.CharField(max_length=225, blank=True, null=True)
 
     def __str__(self):
@@ -194,3 +197,9 @@ class PaymentHasLoad(models.Model):
     id_pyl = models.AutoField(primary_key=True)
     payments = models.ForeignKey(Payment, on_delete=models.CASCADE)  # Field name made lowercase.
     loads = models.ForeignKey(Load, on_delete=models.CASCADE)  # Field name made lowercase.
+
+class CustomerHasLoad(models.Model):
+    id_csl = models.AutoField(primary_key=True)
+    customers = models.ForeignKey(Customer, on_delete=models.CASCADE)  # Field name made lowercase.
+    loads = models.ForeignKey(Load, on_delete=models.CASCADE)
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE)

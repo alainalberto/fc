@@ -9,7 +9,7 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from FirstCall.util import accion_user
 from apps.logistic.models import *
 from apps.tools.models import Folder, Busines, File, Alert
-from apps.services.models import Application
+from apps.services.models import Application, Customer, Driver
 from datetime import datetime, date, time, timedelta
 
 # Create your views here.
@@ -20,6 +20,14 @@ class LoadsView(ListView):
     model = Load
     template_name = 'logistic/load/loadViews.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(LoadsView, self).get_context_data(**kwargs)
+        loads = Load.objects.filter(other_company='False')
+        loads_other = CustomerHasLoad.objects.all()
+        context['loads'] = loads
+        context['loads_other'] = loads_other
+        return context
+
 class LoadsCreate(CreateView):
      model = Load
      form_class = LoadsForm
@@ -27,7 +35,15 @@ class LoadsCreate(CreateView):
 
      def get(self, request, *args, **kwargs):
          form = self.form_class()
-         return render(request, self.template_name, {'form': form, 'title': 'Create new Load'})
+         customer = []
+         customers = Customer.objects.filter(deactivated=False).order_by('company_name')
+         driver = Driver.objects.filter(deactivate=False).order_by('customers')
+         for c in customers:
+             for d in driver:
+                 if d.customers == c:
+                     customer.append(c)
+         driver = Driver.objects.filter(deactivate=False).order_by('customers')
+         return render(request, self.template_name, {'form': form, 'customers':customer, 'drivers':driver, 'title': 'Create new Load'})
 
      def post(self, request, *args, **kwargs):
          form = self.form_class(request.POST)
@@ -41,6 +57,15 @@ class LoadsCreate(CreateView):
                 load = form.save(commit=False)
                 load.users = request.user
                 load.save()
+                if load.other_company:
+                    if request.POST.get('customer', None):
+                        customer = Customer.objects.get(id_cut=request.POST['customer'])
+                        driver = Driver.objects.get(id_drv=request.POST['drivers'])
+                        CustomerHasLoad.objects.create(
+                            customers=customer,
+                            driver = driver,
+                            loads = load
+                        )
                 accion_user(load, ADDITION, request.user)
                 messages.success(request, 'Load save with an extension')
                 return HttpResponseRedirect(reverse_lazy('logistic:loads'))

@@ -22,19 +22,24 @@ def LoadPDF(request, pk):
 
     p.setFont('Helvetica', 28)
     p.setFillColor('#E5E7E9')
-    p.drawCentredString(70, 785, "INVOICE")
+    p.drawCentredString(70, 785, "LOAD")
 
     p.setFillColor('#34495E')
     p.setFont('Helvetica-Bold', 12)
-    p.drawString(50, 730, 'No. '+load+"-"+str(load))
+    p.drawString(50, 730, 'No. '+str(load.number))
 
     p.setFont('Helvetica',12)
     p.setFillColorRGB(0,0,0)
-    p.drawString(460, 700, 'Date: '+str(load))
+    p.drawString(450, 700, 'Pic Up Date: '+str(load.pickup_date))
+    p.line(450, 697, 562, 697)
+
+    p.setFont('Helvetica', 12)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(450, 680, 'Deliver Date: ' + str(load.deliver_date))
     p.line(450, 697, 562, 697)
 
     #Customer
-   # if customer.company_name:
+    # if customer.company_name:
     p.setFillColor('#34495E')
     p.setFont('Helvetica-Bold', 14)
      #   p.drawString(50, 650, customer.company_name)

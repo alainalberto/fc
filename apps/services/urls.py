@@ -76,4 +76,11 @@ urlpatterns = [
     url(r'^contract/edit/(?P<pk>\d+)/$',login_required(permission_required('services.change_contract')(ContractEdit.as_view())),name='contract_edit'),
     url(r'^contract/edit/(?P<pk>\d+)&(?P<popup>[^/]+)/$',login_required(permission_required('services.change_contract')(ContractEdit.as_view())),name='contract_edit'),
     url(r'^contract/(?P<pk>\d+)/$',login_required(permission_required('services.delete_contract')(ContractDelete.as_view())),name='contract_delete'),
+
+    #Companies Dispatch
+    url(r'^dispatch/select$', login_required(permission_required('services.add_dispatch')(CompanyLoadSelect)),name='dispatch_select'),
+    url(r'^dispatch/invoice/loads/(?P<pk>\d+)&(?P<start>[^/]+)&(?P<end>[^/]+)/$', login_required(permission_required('services.add_dispatch')(InvoicesLogCreate)), name='dispatch_loads'),
+
+
+
 ]
