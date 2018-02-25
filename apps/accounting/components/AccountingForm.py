@@ -198,11 +198,7 @@ class InvoicesForm(forms.ModelForm):
             }
 
 class ItemHasInvoiceForm(forms.ModelForm):
-    accounts = forms.ModelChoiceField(
-        required=True,
-        queryset= Account.objects.filter(accounts_id_id=(Account.objects.get(primary=True, name='Income')).id_acn),
-        widget=forms.Select(attrs={'class': 'form-control input-md account', 'name': 'account'}),
-    )
+
     class Meta:
         model = InvoicesHasItem
         fields = {

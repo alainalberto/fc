@@ -74,7 +74,7 @@ class Customer(models.Model):
     ein = models.CharField(max_length=20,blank=True, null=True)
 
     def __str__(self):
-        return '{}'.format(self.fullname)
+        return '{} ( {} )'.format(self.fullname, self.company_name)
 
 class Employee(models.Model):
     id_emp = models.AutoField(primary_key=True)
@@ -118,30 +118,6 @@ class Invoice(models.Model):
     def __str__(self):
         return '{}'.format(self.serial)
 
-
-class InvoiceLoad(models.Model):
-    id_inv = models.AutoField(primary_key=True)
-    biller = models.CharField(max_length=45, blank=True, null=True)
-    biller_address = models.CharField(max_length=100, blank=True, null=True)
-    biller_email = models.EmailField( blank=True, null=True)
-    business = models.ForeignKey(Busines,  on_delete=models.CASCADE)  # Field name made lowercase.
-    users = models.ForeignKey(User,  on_delete=models.CASCADE)  # Field name made lowercase.
-    serial = models.IntegerField()
-    type = models.CharField(max_length=20, blank=True, null=True)
-    start_date = models.DateField(default=datetime.now().strftime("%Y-%m-%d"))
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    waytopay = models.CharField(max_length=20)
-    discount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    comission_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    wire_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    ach_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    paid = models.BooleanField(default=False)
-    prefix = models.CharField(max_length=4, default='inv')
-    end_date = models.DateField(blank=True, null=True)
-
-    def __str__(self):
-        return '{}'.format(self.serial)
 
 class Item(models.Model):
     id_ite = models.AutoField(primary_key=True)

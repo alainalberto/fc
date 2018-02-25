@@ -20,10 +20,10 @@ from apps.services.components.ServicesForm import *
 from apps.tools.components.AlertForm import AlertForm
 from apps.services.models import *
 from apps.accounting.models import Customer
-from apps.logistic.models import CustomerHasLoad, Load
+from apps.logistic.models import CustomerHasLoad, Load, DispatchLoadHasLoad
 from apps.tools.models import Folder, Busines, File, Alert
 from datetime import datetime, date, time, timedelta
-from FirstCall.util import accion_user
+from Trucking.util import accion_user
 import os
 
 
@@ -95,8 +95,8 @@ class PermitCreate(CreateView):
                   customer.ein = permit.ein
                   customer.save()
                   if request.POST.get('txdmv_alert', False) and len(request.POST['txdmv_date_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = permit.txdmv_date_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -108,9 +108,10 @@ class PermitCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('ucr_alert', False) and len(request.POST['ucr_date_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         dateExp = permit.ucr_date_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -122,13 +123,14 @@ class PermitCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   accion_user(permit, ADDITION, request.user)
                   messages.success(request, 'The Permit was saved successfully')
                   return HttpResponseRedirect('/accounting/customers/view/'+str(permit.customers_id))
           else:
               for er in form.errors:
                   messages.error(request, "ERROR: " + er)
-              return render(request, self.template_name, {'form': form, 'is_popup': popup,'title': 'Create Permit'})
+              return self.get(request)
 
 
 class PermitEdit(UpdateView):
@@ -173,15 +175,19 @@ class PermitEdit(UpdateView):
                 customer.company_name = permit.name + ' ' + permit.legal_status
                 customer.ein = permit.ein
                 customer.save()
+                alerCust = CustomerHasAlert.objects.filter(customers=customer)
                 if request.POST.get('txdmv_alert', False) and len(request.POST['txdmv_date_exp']) != 0:
                    dateExp = permit.txdmv_date_exp
                    dateShow = dateExp - timedelta(days=30)
                    alert = Alert.objects.filter(description = "Expires the TXDMV Permit of the customer " + str(customer), category="Urgents")
                    if alert:
                       alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                      for a in alert:
+                          if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                              CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -191,12 +197,15 @@ class PermitEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="Expires the TXDMV Permit of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('ucr_alert', False) and len(request.POST['ucr_date_exp']) != 0:
                    dateExp = permit.ucr_date_exp
@@ -204,9 +213,12 @@ class PermitEdit(UpdateView):
                    alert = Alert.objects.filter(description = "Expires the UCR Permit of the customer " + str(customer), category="Urgents")
                    if alert:
                        alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                       for a in alert:
+                           if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                               CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -216,10 +228,13 @@ class PermitEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(description="Expires the UCR Permit of the customer " + str(customer), category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 accion_user(permit, CHANGE, request.user)
                 messages.success(request, 'The Permit was saved successfully')
@@ -239,6 +254,8 @@ class PermitDelete(DeleteView):
         self.object = self.get_object
         id = kwargs['pk']
         permit = self.model.objects.get(id_com=id)
+        customer = permit.customers
+        alerCust = CustomerHasAlert.objects.filter(customers=customer)
         alert_txdmv = Alert.objects.filter(description = "Expires the TXDMV Permit of the customer " + str(permit.customers),
                                      end_date=permit.txdmv_date_exp)
         alert_ucr = Alert.objects.filter(description = "Expires the UCR Permit of the customer" + str(permit.customers),
@@ -246,11 +263,14 @@ class PermitDelete(DeleteView):
         accion_user(permit, DELETION, request.user)
         if alert_txdmv:
             for a in alert_txdmv:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         if alert_ucr:
             for a in alert_ucr:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
-        customer = permit.customers
         permit.delete()
         messages.success(request, "Permit delete with an extension")
         return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
@@ -510,8 +530,8 @@ class EquipmentCreate(CreateView):
                     equipment.deactivate_date = None
                 equipment.save()
                 if request.POST.get('plate_alert', False) and len(request.POST['plate_date_exp']) != 0:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     dateExp = equipment.plate_date_exp
                     dateShow = dateExp - timedelta(days=30)
@@ -523,9 +543,10 @@ class EquipmentCreate(CreateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 if request.POST.get('reg_alert', False) and len(request.POST['title_date_exp_reg']) != 0:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     dateExp = equipment.title_date_exp_reg
                     dateShow = dateExp - timedelta(days=30)
@@ -537,9 +558,10 @@ class EquipmentCreate(CreateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 if request.POST.get('insp_alert', False) and len(request.POST['title_date_exp_insp']) != 0:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     dateExp = equipment.title_date_exp_insp
                     dateShow = dateExp - timedelta(days=30)
@@ -551,13 +573,14 @@ class EquipmentCreate(CreateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 accion_user(equipment, ADDITION, request.user)
                 messages.success(request, 'The Permit was saved successfully')
                 return HttpResponseRedirect('/accounting/customers/view/' + str(equipment.customers_id))
         else:
             for er in form.errors:
                 messages.error(request, "ERROR: " + er)
-            return render(request, self.template_name, {'form': form, 'is_popup': popup, 'title': 'Create Equiptment'})
+            return self.get(request)
 
 
 class EquipmentEdit(UpdateView):
@@ -598,6 +621,8 @@ class EquipmentEdit(UpdateView):
             else:
                 equipment.deactivate_date = None
             equipment.save()
+            customer = equipment.customers
+            alerCust = CustomerHasAlert.objects.filter(customers=customer)
             if request.POST.get('plate_alert', False)  and len(request.POST['plate_date_exp']) != 0:
                 dateExp = equipment.plate_date_exp
                 dateShow = dateExp - timedelta(days=30)
@@ -606,9 +631,12 @@ class EquipmentEdit(UpdateView):
                     description="Expires of the Plate Equipment Number " + str(equipment.serial) + " of the customer " + str(equipment.customers))
                 if alert:
                     alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                    for a in alert:
+                        if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                           CustomerHasAlert.objects.create(customers=customer, alert=a)
                 else:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     alert = Alert.objects.create(
                         category="Urgents",
@@ -618,12 +646,15 @@ class EquipmentEdit(UpdateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=customer, alert=alert)
             else:
                 alert = Alert.objects.filter(
                     category="Urgents",
                     description="Expires of the Plate Equipment Number " + str(equipment.serial) + " of the customer " + str(equipment.customers))
                 if alert:
                     for a in alert:
+                        if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                            CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                         a.delete()
             if request.POST.get('reg_alert', False) and len(request.POST['title_date_exp_reg']) != 0:
                 dateExp = equipment.title_date_exp_reg
@@ -633,9 +664,12 @@ class EquipmentEdit(UpdateView):
                     description="Expires of the Title Register Equipment Number " + str(equipment.serial) + " of the customer " + str(equipment.customers))
                 if alert:
                     alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                    for a in alert:
+                        if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                           CustomerHasAlert.objects.create(customers=customer, alert=a)
                 else:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     alert = Alert.objects.create(
                         category="Urgents",
@@ -646,6 +680,7 @@ class EquipmentEdit(UpdateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=equipment.customers, alert=alert)
             else:
                 alert = Alert.objects.filter(
                     category="Urgents",
@@ -653,6 +688,8 @@ class EquipmentEdit(UpdateView):
                         equipment.serial) + " of the customer " + str(equipment.customers))
                 if alert:
                     for a in alert:
+                        if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                            CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                         a.delete()
             if request.POST.get('insp_alert', False) and len(request.POST['title_date_exp_insp']) != 0:
                 dateExp = equipment.title_date_exp_insp
@@ -662,9 +699,12 @@ class EquipmentEdit(UpdateView):
                     description="Expires of the Inspection Equipment Number " + str(equipment.serial) + " of the customer " + str(equipment.customers))
                 if alert:
                     alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                    for a in alert:
+                        if not CustomerHasAlert.objects.filter(customers=equipment.customers, alert=a):
+                           CustomerHasAlert.objects.create(customers=equipment.customers, alert=a)
                 else:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     alert = Alert.objects.create(
                         category="Urgents",
@@ -675,6 +715,7 @@ class EquipmentEdit(UpdateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=equipment.customers, alert=alert)
             else:
                 alert = Alert.objects.filter(
                     category="Urgents",
@@ -682,6 +723,8 @@ class EquipmentEdit(UpdateView):
                         equipment.serial) + " of the customer " + str(equipment.customers))
                 if alert:
                     for a in alert:
+                        if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                            CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                         a.delete()
             accion_user(equipment, CHANGE, request.user)
             messages.success(request, 'The Equipment was saved successfully')
@@ -702,6 +745,7 @@ class EquipmentDelete(DeleteView):
         self.object = self.get_object
         id = kwargs['pk']
         equipment = self.model.objects.get(id_com=id)
+        customer = equipment.customers
         alert_plate = Alert.objects.filter(
             category="Urgents",
             description="Expires of the Plate Equipment Number " + str(
@@ -718,16 +762,22 @@ class EquipmentDelete(DeleteView):
         accion_user(equipment, DELETION, request.user)
         if alert_plate:
             for a in alert_plate:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         if alert_reg:
             for a in alert_reg:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         if alert_insp:
             for a in alert_insp:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         equipment.delete()
         messages.success(request, "Permit delete with an extension")
-        return HttpResponseRedirect(self.success_url)
+        return HttpResponseRedirect(HttpResponseRedirect('/accounting/customers/view/' + str(equipment.customers_id)))
 
 def InsuranceView(request, pk, popup):
     insurance = Insurance.objects.get(id_ins=pk)
@@ -767,8 +817,8 @@ class InsuranceCreate(CreateView):
                   insurance.update = datetime.now().strftime("%Y-%m-%d")
                   insurance.save()
                   if request.POST.get('liability_alert', False) and len(request.POST['policy_date_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = insurance.policy_date_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -780,9 +830,10 @@ class InsuranceCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('cargo_alert', False) and len(request.POST['policy_cargo_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = insurance.policy_cargo_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -794,9 +845,10 @@ class InsuranceCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('physical_alert', False) and len(request.POST['policy_physical_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = insurance.policy_physical_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -808,9 +860,10 @@ class InsuranceCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('other_alert', False) and len(request.POST['policy_other_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = insurance.policy_other_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -822,9 +875,10 @@ class InsuranceCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('monthly_alert', False) and len(request.POST['monthlypay']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = insurance.monthlypay
                         dateShow = dateExp - timedelta(days=7)
@@ -836,13 +890,14 @@ class InsuranceCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   accion_user(insurance, ADDITION, request.user)
                   messages.success(request, 'The Insurance was saved successfully')
                   return HttpResponseRedirect('/accounting/customers/view/'+str(insurance.customers_id))
           else:
               for er in form.errors:
                   messages.error(request, "ERROR: " + er)
-              return render(request, self.template_name, {'form': form, 'is_popup': popup,'title': 'Create Insurance'})
+              return self.get(request)
 
 
 class InsuranceEdit(UpdateView):
@@ -880,15 +935,19 @@ class InsuranceEdit(UpdateView):
                 insurance.users = request.user
                 insurance.save()
                 customer = Customer.objects.get(id_cut=insurance.customers_id)
+                alerCust = CustomerHasAlert.objects.filter(customers=customer)
                 if request.POST.get('liability_alert', False) and len(request.POST['policy_date_exp']) != 0:
                    dateExp = insurance.policy_date_exp
                    dateShow = dateExp - timedelta(days=30)
                    alert = Alert.objects.filter(description = "Expires the Insurance Liability Policy  of the customer " + str(customer), category="Urgents")
                    if alert:
                       alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                      for a in alert:
+                          if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                              CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -898,12 +957,15 @@ class InsuranceEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="Expires the Insurance Liability Policy  of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('cargo_alert', False) and len(request.POST['policy_cargo_exp']) != 0:
                    dateExp = insurance.policy_cargo_exp
@@ -911,9 +973,12 @@ class InsuranceEdit(UpdateView):
                    alert = Alert.objects.filter(description = "Expires the Insurance Cargo Policy  of the customer " + str(customer), category="Urgents")
                    if alert:
                       alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                      for a in alert:
+                          if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                              CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -923,12 +988,15 @@ class InsuranceEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="Expires the Insurance Cargo Policy  of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('physical_alert', False) and len(request.POST['policy_physical_exp']) != 0:
                     dateExp = insurance.policy_physical_exp
@@ -938,9 +1006,12 @@ class InsuranceEdit(UpdateView):
                         category="Urgents")
                     if alert:
                         alert.update(show_date=dateShow.strftime("%Y-%m-%d"), end_date=dateExp.strftime("%Y-%m-%d"))
+                        for a in alert:
+                            if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.create(customers=customer, alert=a)
                     else:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         alert = Alert.objects.create(
                             category="Urgents",
@@ -950,12 +1021,15 @@ class InsuranceEdit(UpdateView):
                             end_date=dateExp.strftime("%Y-%m-%d"),
                             users=request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="Expires the Insurance Physical Damage Policy  of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('other_alert', False) and len(request.POST['policy_other_exp']) != 0:
                     dateExp = insurance.policy_other_exp
@@ -965,9 +1039,12 @@ class InsuranceEdit(UpdateView):
                         category="Urgents")
                     if alert:
                         alert.update(show_date=dateShow.strftime("%Y-%m-%d"), end_date=dateExp.strftime("%Y-%m-%d"))
+                        for a in alert:
+                            if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.create(customers=customer, alert=a)
                     else:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         alert = Alert.objects.create(
                             category="Urgents",
@@ -977,12 +1054,16 @@ class InsuranceEdit(UpdateView):
                             end_date=dateExp.strftime("%Y-%m-%d"),
                             users=request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
+
                 else:
                     alert = Alert.objects.filter(
                         description="Expires the Insurance "+str(insurance.other_description)+" Policy  of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('monthly_alert', False) and len(request.POST['monthlypay']) != 0:
                    dateExp = insurance.monthlypay
@@ -990,9 +1071,12 @@ class InsuranceEdit(UpdateView):
                    alert = Alert.objects.filter(description = "The next "+str(dateExp)+" is the monthly insurance payment day of the customer" + str(customer), category="Urgents")
                    if alert:
                       alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                      for a in alert:
+                          if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                              CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -1002,12 +1086,15 @@ class InsuranceEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="The next "+str(dateExp)+" is the monthly insurance payment day of the customer" + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 accion_user(insurance, CHANGE, request.user)
                 messages.success(request, 'The Insurance was saved successfully')
@@ -1015,8 +1102,7 @@ class InsuranceEdit(UpdateView):
         else:
             for er in form.errors:
                 messages.error(request, "ERROR: " + er)
-            return render(request, self.template_name,
-                          {'form': form,  'is_popup': popup, 'title': 'Edit Insurance'})
+            return self.get(request)
 
 class InsuranceDelete(DeleteView):
     model = Insurance
@@ -1027,6 +1113,7 @@ class InsuranceDelete(DeleteView):
         id = kwargs['pk']
         insurance = self.model.objects.get(id_ins=id)
         dateExp = insurance.monthlypay
+        customer = insurance.customers
         alert_liability = Alert.objects.filter(description = "Expires the Insurance Liability Policy  of the customer " + str(insurance.customers),
                                      end_date=insurance.policy_date_exp)
         alert_cargo = Alert.objects.filter(
@@ -1044,23 +1131,32 @@ class InsuranceDelete(DeleteView):
         accion_user(insurance, DELETION, request.user)
         if alert_liability:
           for a in alert_liability:
-             a.delete()
+              if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                  CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
+              a.delete()
         if alert_cargo:
           for a in alert_cargo:
-             a.delete()
+              if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                  CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
+              a.delete()
         if alert_physical:
           for a in alert_physical:
-             a.delete()
+              if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                  CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
+              a.delete()
         if alert_other:
           for a in alert_other:
-             a.delete()
+              if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                  CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
+              a.delete()
         if alert_monthly:
             for a in alert_monthly:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
-        customer = insurance.customers
         insurance.delete()
         messages.success(request, "Insurance delete with an extension")
-        return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
+        return HttpResponseRedirect('/accounting/customers/view/' + str(insurance.customers_id))
 
 def DriverView(request, pk, popup):
     driver = Driver.objects.get(id_drv=pk)
@@ -1109,8 +1205,8 @@ class DriverCreate(CreateView):
                       driver.deactivate_date = None
                   driver.save()
                   if request.POST.get('lic_alert', False) and len(request.POST['lic_date_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name= 'System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name= 'Prime Manager')
                         group_offic = Group.objects.get(name= 'Office Specialist')
                         dateExp = driver.lic_date_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -1122,9 +1218,10 @@ class DriverCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('medicard_alert', False) and len(request.POST['medicard_date_exp']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         dateExp = driver.medicard_date_exp
                         dateShow = dateExp - timedelta(days=30)
@@ -1136,9 +1233,10 @@ class DriverCreate(CreateView):
                             end_date = dateExp.strftime("%Y-%m-%d"),
                             users = request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('drugtest_alert', False) and len(request.POST['drugtest_date_exp']) != 0:
-                      group_admin = Group.objects.get(name='System Administrator')
-                      group_manag = Group.objects.get(name='System Manager')
+                      group_admin = Group.objects.get(name='Prime Administrator')
+                      group_manag = Group.objects.get(name='Prime Manager')
                       group_offic = Group.objects.get(name='Office Specialist')
                       dateExp = driver.drugtest_date_exp
                       dateShow = dateExp - timedelta(days=30)
@@ -1150,9 +1248,10 @@ class DriverCreate(CreateView):
                           end_date=dateExp.strftime("%Y-%m-%d"),
                           users=request.user)
                       alert.group.add(group_admin, group_manag, group_offic)
+                      CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   if request.POST.get('mbr_alert', False) and len(request.POST['mbr_date_exp']) != 0:
-                      group_admin = Group.objects.get(name='System Administrator')
-                      group_manag = Group.objects.get(name='System Manager')
+                      group_admin = Group.objects.get(name='Prime Administrator')
+                      group_manag = Group.objects.get(name='Prime Manager')
                       group_offic = Group.objects.get(name='Office Specialist')
                       dateExp = driver.mbr_date_exp
                       dateShow = dateExp - timedelta(days=30)
@@ -1164,13 +1263,14 @@ class DriverCreate(CreateView):
                           end_date=dateExp.strftime("%Y-%m-%d"),
                           users=request.user)
                       alert.group.add(group_admin, group_manag, group_offic)
+                      CustomerHasAlert.objects.create(customers=customer, alert=alert)
                   accion_user(driver, ADDITION, request.user)
                   messages.success(request, 'The Driver was saved successfully')
                   return HttpResponseRedirect('/accounting/customers/view/'+str(driver.customers_id))
           else:
               for er in form.errors:
                   messages.error(request, "ERROR: " + er)
-              return render(request, self.template_name, {'form': form, 'is_popup': popup,'title': 'Create Driver'})
+              return self.get(request)
 
 
 class DriverEdit(UpdateView):
@@ -1208,16 +1308,19 @@ class DriverEdit(UpdateView):
                 driver.users = request.user
                 driver.save()
                 customer = Customer.objects.get(id_cut=driver.customers_id)
-
+                alerCust = CustomerHasAlert.objects.filter(customers=customer)
                 if request.POST.get('lic_alert', False) and len(request.POST['lic_date_exp']) != 0:
                    dateExp = driver.lic_date_exp
                    dateShow = dateExp - timedelta(days=30)
                    alert = Alert.objects.filter(description = "Expires the License Driver of the customer " + str(customer), category="Urgents")
                    if alert:
                       alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                      for a in alert:
+                          if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                              CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -1227,12 +1330,15 @@ class DriverEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="Expires the License Driver of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('medicard_alert', False) and len(request.POST['medicard_date_exp']) != 0:
                    dateExp = driver.medicard_date_exp
@@ -1240,9 +1346,12 @@ class DriverEdit(UpdateView):
                    alert = Alert.objects.filter(description = "Expires the Medicard Driver of the customer " + str(customer), category="Urgents")
                    if alert:
                        alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                       for a in alert:
+                           if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                               CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -1252,10 +1361,13 @@ class DriverEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(description="Expires the Medicard Driver of the customer " + str(customer), category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('drugtest_alert', False) and len(request.POST['drugtest_date_exp']) != 0:
                    dateExp = driver.drugtest_date_exp
@@ -1263,9 +1375,12 @@ class DriverEdit(UpdateView):
                    alert = Alert.objects.filter(description = "Expires the Drugtest Driver of the customer " + str(customer), category="Urgents")
                    if alert:
                        alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                       for a in alert:
+                           if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                               CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -1275,10 +1390,13 @@ class DriverEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(description="Expires the Drugtest Driver of the customer " + str(customer), category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('mbr_alert', False) and len(request.POST['mbr_date_exp']) != 0:
                    dateExp = driver.mbr_date_exp
@@ -1286,9 +1404,12 @@ class DriverEdit(UpdateView):
                    alert = Alert.objects.filter(description = "Expires the Mbr Driver of the customer " + str(customer), category="Urgents")
                    if alert:
                        alert.update(show_date = dateShow.strftime("%Y-%m-%d"), end_date = dateExp.strftime("%Y-%m-%d"))
+                       for a in alert:
+                           if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                               CustomerHasAlert.objects.create(customers=customer, alert=a)
                    else:
-                       group_admin = Group.objects.get(name='System Administrator')
-                       group_manag = Group.objects.get(name='System Manager')
+                       group_admin = Group.objects.get(name='Prime Administrator')
+                       group_manag = Group.objects.get(name='Prime Manager')
                        group_offic = Group.objects.get(name='Office Specialist')
                        alert = Alert.objects.create(
                            category="Urgents",
@@ -1298,10 +1419,13 @@ class DriverEdit(UpdateView):
                            end_date=dateExp.strftime("%Y-%m-%d"),
                            users=request.user)
                        alert.group.add(group_admin, group_manag, group_offic)
+                       CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(description="Expires the Mbr Driver of the customer " + str(customer), category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 accion_user(driver, CHANGE, request.user)
                 messages.success(request, 'The Driver was saved successfully')
@@ -1321,6 +1445,7 @@ class DriverDelete(DeleteView):
         self.object = self.get_object
         id = kwargs['pk']
         driver = self.model.objects.get(id_drv=id)
+        customer = driver.customers
         alert_lic = Alert.objects.filter(description="Expires the License Driver of the customer " + str(driver.customers),
                                            end_date=driver.lic_date_exp)
         alert_medicard = Alert.objects.filter(description="Expires the Medicard Driver of the customer" + str(driver.customers),
@@ -1332,16 +1457,23 @@ class DriverDelete(DeleteView):
         accion_user(driver, DELETION, request.user)
         if alert_lic:
             for a in alert_lic:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
-            alert_lic.delete()
         if alert_medicard:
             for a in alert_medicard:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         if alert_drugtest:
+            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
             for a in alert_drugtest:
                 a.delete()
         if alert_mbr:
             for a in alert_mbr:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         customer = driver.customers
         driver.delete()
@@ -1387,8 +1519,8 @@ class IftaCreate(CreateView):
                     ifta.update = datetime.now().strftime("%Y-%m-%d")
                     ifta.save()
                     if request.POST.get('nex_period_alert', False) and len(request.POST['nex_period']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         dateExp = ifta.nex_period
                         dateShow = dateExp - timedelta(days=30)
@@ -1400,9 +1532,10 @@ class IftaCreate(CreateView):
                             end_date=dateExp.strftime("%Y-%m-%d"),
                             users=request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                     if request.POST.get('payment_alert', False) and len(request.POST['payment_due']) != 0:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         dateExp = ifta.payment_due
                         dateShow = dateExp - timedelta(days=30)
@@ -1414,7 +1547,7 @@ class IftaCreate(CreateView):
                             end_date=dateExp.strftime("%Y-%m-%d"),
                             users=request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
-
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                     accion_user(ifta, ADDITION, request.user)
                     messages.success(request, 'The Ifta was saved successfully')
                     return HttpResponseRedirect('/accounting/customers/view/' + str(ifta.customers_id))
@@ -1465,9 +1598,12 @@ class IftaEdit(UpdateView):
                         description="Next period of the customer " + str(customer), category="Urgents")
                     if alert:
                         alert.update(show_date=dateShow.strftime("%Y-%m-%d"), end_date=dateExp.strftime("%Y-%m-%d"))
+                        for a in alert:
+                            if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.create(customers=customer, alert=a)
                     else:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         alert = Alert.objects.create(
                             category="Urgents",
@@ -1477,12 +1613,15 @@ class IftaEdit(UpdateView):
                             end_date=dateExp.strftime("%Y-%m-%d"),
                             users=request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="Next period of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 if request.POST.get('payment', False) and len(request.POST['payment_due']) != 0:
                     dateExp = ifta.payment_due
@@ -1491,9 +1630,12 @@ class IftaEdit(UpdateView):
                         description="IFTA Payment Due of the customer " + str(customer), category="Urgents")
                     if alert:
                         alert.update(show_date=dateShow.strftime("%Y-%m-%d"), end_date=dateExp.strftime("%Y-%m-%d"))
+                        for a in alert:
+                            if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.create(customers=customer, alert=a)
                     else:
-                        group_admin = Group.objects.get(name='System Administrator')
-                        group_manag = Group.objects.get(name='System Manager')
+                        group_admin = Group.objects.get(name='Prime Administrator')
+                        group_manag = Group.objects.get(name='Prime Manager')
                         group_offic = Group.objects.get(name='Office Specialist')
                         alert = Alert.objects.create(
                             category="Urgents",
@@ -1503,12 +1645,15 @@ class IftaEdit(UpdateView):
                             end_date=dateExp.strftime("%Y-%m-%d"),
                             users=request.user)
                         alert.group.add(group_admin, group_manag, group_offic)
+                        CustomerHasAlert.objects.create(customers=customer, alert=alert)
                 else:
                     alert = Alert.objects.filter(
                         description="IFTA Payment Due of the customer " + str(customer),
                         category="Urgents")
                     if alert:
                         for a in alert:
+                            if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                                CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                             a.delete()
                 accion_user(ifta, CHANGE, request.user)
                 messages.success(request, 'The Ifta was saved successfully')
@@ -1528,6 +1673,7 @@ class IftaDelete(DeleteView):
             self.object = self.get_object
             id = kwargs['pk']
             ifta = self.model.objects.get(id_ift=id)
+            customer = ifta.customers
             nex_period_alert = Alert.objects.filter(
                 description="Next period of the customer " + str(ifta.customers),
                 end_date=ifta.nex_period)
@@ -1537,11 +1683,14 @@ class IftaDelete(DeleteView):
             accion_user(ifta, DELETION, request.user)
             if nex_period_alert:
                 for a in nex_period_alert:
+                    if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                        CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                     a.delete()
             if payment_alert:
                 for a in payment_alert:
+                    if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                        CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                     a.delete()
-            customer = ifta.customers
             ifta.delete()
             messages.success(request, "Ifta delete with an extension")
             return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
@@ -1700,8 +1849,8 @@ class ContractCreate(CreateView):
             contract.update = datetime.now().strftime("%Y-%m-%d")
             contract.save()
             if request.POST.get('end_alert', False) and len(request.POST['end_date']) != 0:
-                group_admin = Group.objects.get(name='System Administrator')
-                group_manag = Group.objects.get(name='System Manager')
+                group_admin = Group.objects.get(name='Prime Administrator')
+                group_manag = Group.objects.get(name='Prime Manager')
                 group_offic = Group.objects.get(name='Office Specialist')
                 dateExp = contract.end_date
                 dateShow = dateExp - timedelta(days=30)
@@ -1714,6 +1863,7 @@ class ContractCreate(CreateView):
                     end_date=dateExp.strftime("%Y-%m-%d"),
                     users=request.user)
                 alert.group.add(group_admin, group_manag, group_offic)
+                CustomerHasAlert.objects.create(customers=customer, alert=alert)
             accion_user(contract, ADDITION, request.user)
             messages.success(request, 'The Contract was saved successfully')
             return HttpResponseRedirect('/accounting/customers/view/' + str(contract.customers_id))
@@ -1780,9 +1930,12 @@ class ContractEdit(UpdateView):
                     description="The client's "+str(contract.type)+" contract ("+contract.serial+") "+str(customer)+" expires ")
                 if alert:
                     alert.update(show_date=dateShow.strftime("%Y-%m-%d"), end_date=dateExp.strftime("%Y-%m-%d"))
+                    for a in alert:
+                        if not CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                            CustomerHasAlert.objects.create(customers=customer, alert=a)
                 else:
-                    group_admin = Group.objects.get(name='System Administrator')
-                    group_manag = Group.objects.get(name='System Manager')
+                    group_admin = Group.objects.get(name='Prime Administrator')
+                    group_manag = Group.objects.get(name='Prime Manager')
                     group_offic = Group.objects.get(name='Office Specialist')
                     alert = Alert.objects.create(
                         category="Urgents",
@@ -1792,12 +1945,15 @@ class ContractEdit(UpdateView):
                         end_date=dateExp.strftime("%Y-%m-%d"),
                         users=request.user)
                     alert.group.add(group_admin, group_manag, group_offic)
+                    CustomerHasAlert.objects.create(customers=customer, alert=alert)
             else:
                 alert = Alert.objects.filter(
                     category="Urgents",
                     description="The client's " + str(contract.type) + " contract ("+contract.serial+") " + str(customer) + " expires ")
                 if alert:
                     for a in alert:
+                        if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                            CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                         a.delete()
             accion_user(contract, CHANGE, request.user)
             messages.success(request, 'The Audit was saved successfully')
@@ -1824,6 +1980,8 @@ class ContractDelete(DeleteView):
                 customer) + " expires ")
         if alert:
             for a in alert:
+                if CustomerHasAlert.objects.filter(customers=customer, alert=a):
+                    CustomerHasAlert.objects.filter(customers=customer, alert=a).delete()
                 a.delete()
         accion_user(contract, DELETION, request.user)
         contract.delete()
@@ -1875,141 +2033,177 @@ def CompanyLoadSelect(request):
           id = request.POST.get('customers', None)
           start = request.POST.get('start', None)
           end = request.POST.get('end', None)
-          return HttpResponseRedirect('/services/dispatch/invoice/loads/'+id+'&'+start+'&'+end)
+          return HttpResponseRedirect('/services/dispatch/invoice/create/'+id+'&'+start+'&'+end)
 
      return render(request, 'services/companiesDispatch/selectLoadsForm.html', context)
 
-def InvoicesLogCreate(request, pk, start, end):
+class InvoicesLogViews(ListView):
+    model = Invoice
+    template_name = 'accounting/invoices/invoiceslogViews.html'
 
-        customer = Customer.objects.get(id_cut=pk)
-        file = File.objects.filter(folders=customer.folders, name='LOGO', category='Misselenious')
-        logo = 'img/logos/trucklogo.jpg'
-        if file:
-            logo = str(File.objects.get(folders=customer.folders, name='LOGO', category='Misselenious').url)
-        customerLoads = CustomerHasLoad.objects.filter(customers=customer)
-        start_date = datetime.strptime(start, '%Y-%m-%d')
-        end_date = datetime.strptime(end, '%Y-%m-%d')
-        load_driver = []
-        for l in customerLoads:
-            pickup_date = datetime.strptime(str(l.loads.pickup_date), '%Y-%m-%d')
-            deliver_date = datetime.strptime(str(l.loads.deliver_date), '%Y-%m-%d')
-            if pickup_date >= start_date and deliver_date <= end_date:
-               load_driver.append(l)
-        context = {
-                    'start_date': start,
-                    'end_date': end,
-                    'loads': load_driver,
-                    'customers': customer,
-                    'title': 'Create new Invoice'
-                }
-        if request.method == 'POST':
-            descrip = []
-            serial = request.POST['serial']
-            subtotal = request.POST['subtotal']
-            comission = request.POST['comission_fee']
-            wire = request.POST['wire_fee']
-            ach = request.POST['ach_fee']
-            other = request.POST['other_fee']
-            total = request.POST['total']
-            for l in customerLoads:
-                load = request.POST.get('id_'+str(l.loads.id_lod), None)
+    def get_context_data(self, **kwargs):
+        context = super(InvoicesLogViews, self).get_context_data(**kwargs)
+        invoice = self.model.objects.filter(type='load').order_by('-start_date')
+        context['title'] = 'List Invoices'
+        context['object_list'] = invoice
+        return context
+
+
+
+def InvoiceLogView(request, pk):
+            invoice = DispatchLoad.objects.get(id_inv=pk)
+            InvLod = DispatchLoadHasLoad.objects.filter(invoices=invoice.id)
+            loads = []
+            for d in InvLod:
+               loads.append(Load.objects.get(id_lod=d.loads_id))
+            context = {'invoice': invoice,
+                       'description': loads,
+                       'id': pk,
+                       'title': 'Invoice',
+                       }
+            return render(request, 'services/companiesDispatch/invoiceslogView.html', context)
+
+class InvoicesLogCreate(CreateView):
+        model = DispatchLoad
+        form_class = CompanesDispatchForm
+        template_name = 'services/companiesDispatch/invoiceslogForm.html'
+
+        def get(self, request, *args, **kwargs):
+            load_customer = []
+            customer = Customer.objects.get(id_cut=self.kwargs.get('pk', 0))
+            loads = CustomerHasLoad.objects.filter(customers=customer)
+            start = datetime.strptime(str(kwargs.get('start')), '%Y-%m-%d')
+            end = datetime.strptime(str(kwargs.get('end')), '%Y-%m-%d')
+            for l in loads:
+                load = Load.objects.get(id_lod=l.loads_id)
+                pickup_date = datetime.strptime(str(load.pickup_date), '%Y-%m-%d')
+                deliver_date = datetime.strptime(str(load.deliver_date), '%Y-%m-%d')
+                if pickup_date >= start and deliver_date <= end:
+                     load_customer.append(load)
+            form = self.form_class(initial={'start_date': kwargs.get('start'), 'end_date': kwargs.get('end')})
+            context= {'form': form,
+                      'title':'Create new Invoice',
+                      'loads':load_customer,
+                      'customer':customer
+                      }
+            return render(request, self.template_name, context)
+
+        def post(self, request, *args, **kwargs):
+
+            form = self.form_class(request.POST)
+            customer = Customer.objects.get(id_cut=self.kwargs.get('pk', 0))
+            user = request.user
+            invs = DispatchLoad.objects.filter(customers=customer).order_by('-serial')
+            loads = Load.objects.filter(other_company=True)
+            serial = 1
+            serials = []
+            loadInv = []
+            for s in invs:
+                serials.append(s.serial)
+            for l in loads:
+                load = request.POST.get('id_'+str(l.id_lod), None)
                 if load:
-                    descrip.append(l)
-            response = HttpResponse(content_type='application/pdf')
-            buffer = BytesIO()
-            p = canvas.Canvas(buffer, pagesize=A4)
+                    loadInv.append(l)
+            if form.is_valid() and loadInv:
+                if serials:
+                    serial = int(serials[0]) + 1
+                invoice = form.save(commit=False)
+                invoice.serial = serial
+                invoice.type = 'service'
+                invoice.users = user
+                invoice.customers = customer
+                invoice.save()
+                accion_user(invoice, ADDITION, request.user)
+                for lodinv in loadInv:
+                    DispatchLoadHasLoad.objects.create(
+                      invoices=invoice,
+                      loads=lodinv
+                    )
+                    if request.POST.get('paid_'+str(lodinv.id_lod), False):
+                        Load.objects.filter(id_lod=lodinv.id_lod).update(paid='True')
+                    else:
+                        Load.objects.filter(id_lod=lodinv.id_lod).update(paid='False')
+                messages.success(request, "Invoice saved with an extension")
 
-            # Header
-            p.setFillColor('#2471A3')
-            p.roundRect(0, 750, 694, 120, 20, fill=1)
-            p.drawImage('static/media/'+logo, 440, 760, width=150, height=70)
-
-            p.setFont('Helvetica', 16)
-            p.setFillColor('#E5E7E9')
-            p.drawCentredString(300, 785, customer.company_name)
-
-            p.setFont('Helvetica', 28)
-            p.setFillColor('#E5E7E9')
-            p.drawCentredString(70, 785, "INVOICE")
-
-            p.setFillColor('#34495E')
-            p.setFont('Helvetica-Bold', 12)
-            p.drawString(410, 720, 'No: '+str(serial))
-
-            p.setFont('Helvetica', 10)
-            p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
-            p.drawString(65, 700, customer.address)
-            p.drawImage('static/img/icon/phone-o.png', 50, 680, width=10, height=10)
-            p.drawString(65, 680, customer.phone)
-
-
-            p.setFont('Helvetica', 11)
-            p.setFillColorRGB(0, 0, 0)
-            p.drawString(410, 700, 'Week Star Date: ' + str(start))
-            p.drawString(410, 680, 'Week End Date: ' + str(end))
+                return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
+            else:
+                for er in form.errors:
+                    messages.error(request, er)
+                return self.get(request)
 
 
-            # Boby
-            p.setFillColor('#020000')
-            p.setFont('Helvetica', 11)
-            p.drawString(450, 150, "Subtotal: $" + str(subtotal))
-            p.setFont('Helvetica', 11)
-            p.drawString(450, 130, "7% FEE: $" + str(comission))
-            p.setFont('Helvetica', 11)
-            p.drawString(450, 110, "WIRE FEE: $" + str(wire))
-            p.setFont('Helvetica', 11)
-            p.drawString(450, 90, "ACH FEE: $" + str(ach))
-            p.setFont('Helvetica', 11)
-            p.drawString(450, 70, "Others FEE: $" + str(other))
-            p.setFont('Helvetica-Bold', 12)
-            p.drawString(450, 50, "Total: $" + str(total))
+class InvoicesLogEdit(UpdateView):
+        model = DispatchLoad
+        form_class = CompanesDispatchForm
+        template_name = 'services/companiesDispatch/invoiceslogForm.html'
 
-            styles = getSampleStyleSheet()
-            stylesBH = styles["Heading3"]
-            stylesBH.alignment = TA_CENTER
-            stylesBH.fontSize = 10
-            stylesBH.fill = '#34495E'
-            broker = Paragraph('''Customer Name''', stylesBH)
-            driver = Paragraph('''Driver''', stylesBH)
-            pickupdate = Paragraph('''Pick Up Date''', stylesBH)
-            pickupfrom = Paragraph('''Pick Up From''', stylesBH)
-            deliver = Paragraph('''Deliver To''', stylesBH)
-            loadno = Paragraph('''Load No.''', stylesBH)
-            value = Paragraph('''Agreed Amount''', stylesBH)
-            data = []
-            data.append([broker, driver, pickupdate, pickupfrom, deliver, loadno, value])
+        def get_context_data(self, **kwargs):
+            context = super(InvoicesLogEdit, self).get_context_data(**kwargs)
+            pk = self.kwargs.get('pk', 0)
+            adjust = self.kwargs.get('bill')
 
-            stylesBD = styles["BodyText"]
-            stylesBD.alignment = TA_CENTER
-            stylesBD.fontSize = 7
-            high = 600
-            for l in descrip:
-                colum1 = Paragraph(l.loads.broker, stylesBD)
-                colum2 = Paragraph(str(l.driver), stylesBD)
-                colum3 = Paragraph(str(l.loads.pickup_date), stylesBD)
-                colum4 = Paragraph(l.loads.pickup_from, stylesBD)
-                colum5 = Paragraph(l.loads.deliver, stylesBD)
-                colum6 = Paragraph(l.loads.number, stylesBD)
-                colum7 = Paragraph(str(l.loads.value), stylesBD)
-                this_descrip = [colum1, colum2, colum3, colum4, colum5, colum6, colum7]
-                data.append(this_descrip)
-                high = high - 18
+            invoice = self.model.objects.get(id_inv=pk)
+            customer = invoice.customers
+            description = []
+            loadInv = DispatchLoadHasLoad.objects.filter(invoices=invoice)
+            for l in loadInv:
+                load = Load.objects.get(id_lod=l.loads_id)
+                description.append(load)
+            context['title'] = 'Create new Invoice'
+            context['customers'] = customer
+            context['loads'] = description
+            context['adjust'] = adjust
+            return context
 
-            width, height = A4
-            table = Table(data, colWidths=[3 * cm, 3 * cm, 2 * cm, 3 * cm, 3 * cm, 2 * cm, 2 * cm])
-            table.setStyle(TableStyle([
-                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
-            ]))
-            table.wrapOn(p, width, height)
-            table.drawOn(p, 40, high)
+        def post(self, request, *args, **kwargs):
+            self.object = self.get_object
+            id_inv = kwargs['pk']
+            invoice = self.model.objects.get(id_inv=id_inv)
+            customer = invoice.customers
+            form = self.form_class(request.POST, instance=invoice)
+            loads = Load.objects.all()
+            loadInv = []
+            for l in loads:
+                load = request.POST.get('id_' + str(l.id_lod), None)
+                if load:
+                    loadInv.append(l)
+            if form.is_valid():
+                invoice = form.save()
+                InvHasLod = DispatchLoadHasLoad.objects.filter(invoices=invoice)
+                for i in InvHasLod:
+                    load = Load.objects.get(id_lod=i.loads_id)
+                    if loadInv.__contains__(load):
+                        i.delete()
+                for lodinv in loadInv:
+                    if not DispatchLoadHasLoad.objects.filter(invoices=invoice, loads=lodinv):
+                       DispatchLoadHasLoad.objects.create(
+                        invoices=invoice,
+                        loads=lodinv
+                        )
+                    if request.POST.get('paid_' + str(lodinv.id_lod), False):
+                        Load.objects.filter(id_lod=lodinv.id_lod).update(paid='True')
+                    else:
+                        Load.objects.filter(id_lod=lodinv.id_lod).update(paid='False')
+                messages.success(request, "Invoice update with an extension")
+                return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
+            else:
+                for er in form.errors:
+                    messages.error(request, "ERROR: " + er)
+                return self.get_context_data()
 
-            p.showPage()
-            p.save()
-            pdf = buffer.getvalue()
-            buffer.close()
-            response.write(pdf)
-            return response
+class InvoicesLogDelete(DeleteView):
+        model = Invoice
+        template_name = 'confirm_delete.html'
 
-        return render(request, 'services/companiesDispatch/invoiceLoadForm.html', context)
+        def delete(self, request, *args, **kwargs):
+            self.object = self.get_object
+            id_inv = kwargs['pk']
+            invoice = self.model.objects.get(id_inv=id_inv)
+            customer = Customer.objects.get(id_cut=invoice.customers.id_cut)
+            DispatchLoadHasLoad.objects.filter(invoices=invoice).delete()
+            accion_user(invoice, DELETION, request.user)
+            invoice.delete()
+            messages.success(request, "Invoice delete with an extension")
+            return HttpResponseRedirect('/accounting/customers/view/' + str(customer.id_cut))
+
 

@@ -38,6 +38,13 @@ class Busines(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
+@receiver(pre_delete, sender=Busines)
+def _file_delete(sender, instance, using, **kwargs):
+        file_path = settings.BASE_DIR + '/static/media/' + str(instance.logo)
+
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
 # Model Tables relation profiler-alerts
 class Alert(models.Model):
     id_alt = models.AutoField(primary_key=True)
@@ -48,7 +55,7 @@ class Alert(models.Model):
     show_date = models.DateField()
     end_date = models.DateField()
     deactivated = models.BooleanField(default=False)
-    group = models.ManyToManyField(Group, blank=True, null=True)
+    group = models.ManyToManyField(Group)
 
     def __str__(self):
         return '{}'.format(self.description)
@@ -117,10 +124,7 @@ class Directory(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
-class Menus_Group(models.Model):
-    id_mgr = models.AutoField(primary_key=True)
-    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
 
 
 

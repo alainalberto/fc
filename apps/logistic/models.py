@@ -2,9 +2,11 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from apps.accounting.models import Account, Invoice, InvoiceLoad, Fee, Payment
+from apps.accounting.models import Account, Invoice, Fee, Payment
 
-from apps.services.models import Customer, Driver
+from apps.services.models import Customer, Driver, DispatchLoad
+
+from apps.tools.models import Busines
 
 # Create your models here.
 
@@ -12,6 +14,7 @@ from apps.services.models import Customer, Driver
 class TrucksLogt(models.Model):
     id_tuk = models.AutoField(primary_key=True)
     users = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    business = models.ForeignKey(Busines, blank=True, null=True, on_delete=models.CASCADE)
     type = models.CharField(max_length=45, blank=True, null=True)
     year = models.IntegerField(blank=True, null=True)
     model = models.CharField(max_length=45, blank=True, null=True)
@@ -98,6 +101,7 @@ class Diesel(models.Model):
 class PermissionsLogt(models.Model):
     id_prm = models.AutoField(primary_key=True)
     users = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)  # Field name made lowercase.
+    business = models.ForeignKey(Busines, blank=True, null=True, on_delete=models.CASCADE)
     date = models.DateField(blank=True, null=True)
     usdot = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     usdot_pin = models.CharField(max_length=20, blank=True, null=True)
@@ -118,6 +122,7 @@ class InsuranceLogt(models.Model):
     id_inr = models.AutoField(primary_key=True)
     users = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)  # Field name made lowercase.
     accounts = models.ForeignKey(Account, blank=True, null=True, on_delete=models.CASCADE)  # Field name made lowercase.
+    business = models.ForeignKey(Busines, blank=True, null=True, on_delete=models.CASCADE)
     down_payment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     pilicy_efective_date = models.DateField(blank=True, null=True)
     pilicy_date_exp = models.DateField(blank=True, null=True)
@@ -167,11 +172,6 @@ class InvoicesHasLoad(models.Model):
     loads = models.ForeignKey(Load, on_delete=models.CASCADE)  # Field name made lowercase.
 
 
-class InvoicesLoadHasLoad(models.Model):
-    id_inl = models.AutoField(primary_key=True)
-    invoices = models.ForeignKey(InvoiceLoad, on_delete=models.CASCADE)  # Field name made lowercase.
-    loads = models.ForeignKey(Load, on_delete=models.CASCADE)  # Field name made lowercase.
-
 class DriversHasPayment(models.Model):
     id_pym = models.AutoField(primary_key=True)
     payments = models.ForeignKey(Payment, on_delete=models.CASCADE)  # Field name made lowercase.
@@ -203,3 +203,13 @@ class CustomerHasLoad(models.Model):
     customers = models.ForeignKey(Customer, on_delete=models.CASCADE)  # Field name made lowercase.
     loads = models.ForeignKey(Load, on_delete=models.CASCADE)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
+
+class DispatchLoadHasLoad(models.Model):
+    id_inl = models.AutoField(primary_key=True)
+    invoices = models.ForeignKey(DispatchLoad, on_delete=models.CASCADE)  # Field name made lowercase.
+    loads = models.ForeignKey(Load, on_delete=models.CASCADE)  # Field name made lowercase.
+
+class BusinessHasLoad(models.Model):
+    id_bsl = models.AutoField(primary_key=True)
+    business = models.ForeignKey(Busines, on_delete=models.CASCADE)  # Field name made lowercase.
+    loads = models.ForeignKey(Load, on_delete=models.CASCADE)
