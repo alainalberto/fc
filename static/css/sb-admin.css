@@ -26,6 +26,18 @@ body {
     line-height: normal;
 }
 
+@media(max-width:768px) {
+  .top-nav {
+      padding: 10px 15px;
+  }
+
+  .side-nav>li>ul>li{
+    background-color: #222;
+  }
+
+
+}
+
 @media(min-width:768px) {
     body {
         margin-top: 50px;
@@ -38,6 +50,8 @@ body {
         padding: 10px;
         heading: 90%;
     }
+
+
     .side-nav {
         position: fixed;
         top: 51px;
