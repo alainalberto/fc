@@ -89,14 +89,15 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
-    #'/var/www/prime1agency.com/static/',
+    #'/var/www/static',
 ]
 
-STATIC_ROOT = "/var/www/truckinghelp.net/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_pro')
+
 
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = "/var/www/truckinghelp.net/static/media"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'media')
 
 TEMPLATES = [
     {
