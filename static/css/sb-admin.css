@@ -17,6 +17,7 @@ body {
 
 #page-wrapper {
     width: 100%;
+    height: 100%;
     padding: 0;
     background-color: #fff;
 }
@@ -35,6 +36,14 @@ body {
     background-color: #222;
   }
 
+  .navbar-header>a>img{
+     margin-left: 30%;
+  }
+  .navbar-header>a>img{
+   width: 200%;
+   height: 200%;
+  }
+
 
 }
 
@@ -47,14 +56,24 @@ body {
     }
 
     #page-wrapper {
-        padding: 10px;
+        top: 90px;
+        padding: 50px 10px 10px 10px;
         heading: 90%;
     }
 
+    .navbar-header>a>img{
+     padding: 0px;
+     margin-left: -25%;
+     }
+
+    .navbar-header>a>img{
+       width: 280%;
+       height: 280%;
+     }
 
     .side-nav {
         position: fixed;
-        top: 51px;
+        top: 80px;
         left: 225px;
         width: 225px;
         margin-left: -225px;
@@ -82,12 +101,18 @@ body {
 /* Top Navigation */
 
 .top-nav {
-    padding: 0 15px;
+    padding: 15px 15px;
 }
 
 .panel-body {
     height: 100%;
 }
+
+navbar-header{
+   padding: 0 !important;
+}
+
+
 
 .top-nav>li {
     display: inline-block;
