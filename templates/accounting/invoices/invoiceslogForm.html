@@ -15,7 +15,7 @@
  $(document).ready( function () {
     $('#id_load_TOTAL_FORMS').val($('#tbLoad tr').length - 1);
     $('#id_customers').val({{invoice.customers_id}});
-    $('#id_accounts').val({{account}});
+    $('#id_accounts').val({{invoice.accounts_id}});
     $(function() {
         $("#id_customers").chained("#id_business");
         $("#id_accounts").chained("#id_business");
@@ -206,7 +206,7 @@
     </div>
     <div class="panel-body">
         <form name="form_invoices" method="post" class="form" role="form" id="form_invoices" validate>{% csrf_token %}
-            <p class="bg-info"><strong>Invoice Header</strong></p>
+            <p class="bg-danger"><strong>Invoice Header</strong></p>
             <fieldset>
                 <!-- Form Name -->
                 <!-- Text input-->
@@ -314,7 +314,7 @@
                 </div>
             </div>
             <fieldset>
-                <p class="bg-info"><strong>Drescription to Invoice</strong></p>
+                <p class="bg-danger"><strong>Drescription to Invoice</strong></p>
                 <div id="panelLoad">
                     {% if not adjust == '1'%}
                     <div class="form-group col-md-offset-11">
@@ -359,11 +359,11 @@
                     </table>
 
                     <div class="row">
-                        <div class="form-group col-md-8">
+                        <div class="form-group col-md-9">
                             <label class="label-control">Notes:</label>
                             {{form.note}}
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2 ">
                             <label class="label-control">{{form.subtotal.label}}</label>
                             <div class="input-group">
                                 <span class="input-group-addon">$</span>
@@ -390,7 +390,7 @@
                                 <span class="input-group-addon">$</span>
                                 {{form.ach_fee}}
                             </div>
-                            <label class="label-control col-lg-9">{{form.total.label}}</label>
+                            <label class="label-control">{{form.total.label}}</label>
                             <div class="input-group">
                                 <span class="input-group-addon">$</span>
                                 {{form.total}}

@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from django.forms import modelform_factory, inlineformset_factory, formset_factory, BaseModelFormSet
 from django.contrib import messages
-from Trucking.util import accion_user
+from Prime.util import accion_user
 from apps.accounting.components.AccountingForm import *
 from apps.accounting.models import *
 from apps.accounting.components.AccountingPDF import PayDriverPDF, PayDispatchPDF, PayEmployeePDF
@@ -817,11 +817,9 @@ class InvoicesLogEdit(UpdateView):
             context = super(InvoicesLogEdit, self).get_context_data(**kwargs)
             pk = self.kwargs.get('pk', 0)
             adjust = self.kwargs.get('bill')
-
             invoice = self.model.objects.get(id_inv=pk)
             loads = Load.objects.filter(paid='False').order_by('-pickup_date')
             customer = Customer.objects.filter(deactivated=False)
-            acountDescp = AccountDescrip.objects.get(type='Invoices', document=int(invoice.id_inv))
             accounts = []
             inv = Account.objects.get(primary=True, name='Income')
             inv_acconts = Account.objects.filter(accounts_id_id=inv.id_acn)
@@ -841,7 +839,7 @@ class InvoicesLogEdit(UpdateView):
             context['title'] = 'Create new Invoice'
             context['loads'] = loads
             context['customers'] = customer
-            context['account'] = acountDescp.accounts_id
+            context['invoice'] = invoice
             context['description'] = description
             context['adjust'] = adjust
             return context
