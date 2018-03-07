@@ -39,10 +39,6 @@ body {
   .navbar-header a img{
      margin-left: 30%;
   }
-  .navbar-header a img{
-   width: 200%;
-   height: 200%;
-  }
 
 
 }
@@ -66,10 +62,7 @@ body {
      margin-left: -25%;
      }
 
-    .navbar-header a img{
-       width: 280%;
-       height: 280%;
-     }
+
 
     .side-nav {
         position: fixed;
