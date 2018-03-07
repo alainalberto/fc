@@ -19,17 +19,17 @@ def Receipt_pdf(request, pk):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     #Header
-    p.setFillColor('#B40404')
-    p.roundRect(0, 720, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 720, 694, 150, 5, fill=1)
 
     if recpt.business.logo:
         p.drawImage('static/media/' + str(recpt.business.logo), 250, 735, width=100, height=100)
 
     p.setFont('Helvetica', 28)
-    p.setFillColor('#000')
+    p.setFillColor('#FFFFFF')
     p.drawCentredString(70, 785, "INVOICE")
 
-    p.setFillColor('#34495E')
+    p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + recpt.prefix + "-" + str(recpt.serial))
 
@@ -49,13 +49,12 @@ def Receipt_pdf(request, pk):
     p.setFillColorRGB(0, 0, 0)
     p.drawString(50, 745, 'Date: ' + str(recpt.invoice.start_date))
 
-    #Footer
-    p.setFillColor('#B40404')
-    p.roundRect(0, 40, 694, 10, 5, fill=1)
+    # Footer
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 0, 720, 50, 5, fill=1)
     p.setFont('Helvetica', 9)
     p.setFillColorRGB(0, 0, 0)
     p.line(0, 50, 800, 50)
-    user_print = ""
     if request.user.first_name:
         user_print = request.user.first_name + " " + request.user.last_name
     else:
@@ -113,17 +112,17 @@ def Invoices_pdf(request, pk):
 
     #Header
 
-    p.setFillColor('#B40404')
-    p.roundRect(0, 720, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 720, 694, 150, 5, fill=1)
 
     if invoice.business.logo:
        p.drawImage('static/media/'+str(invoice.business.logo), 250, 735, width=100, height=100)
 
     p.setFont('Helvetica', 28)
-    p.setFillColor('#000')
+    p.setFillColor('#FFFFFF')
     p.drawCentredString(70, 785, "INVOICE")
 
-    p.setFillColor('#34495E')
+    p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. '+invoice.prefix+"-"+str(invoice.serial))
 
@@ -162,12 +161,11 @@ def Invoices_pdf(request, pk):
 
 
     #Footer
-    p.setFillColor('#B40404')
-    p.roundRect(0, 40, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 0, 720, 50, 5, fill=1)
     p.setFont('Helvetica', 9)
     p.setFillColorRGB(0, 0, 0)
     p.line(0, 50, 800, 50)
-    user_print = ""
     if request.user.first_name:
         user_print = request.user.first_name+" "+request.user.last_name
     else:
@@ -240,17 +238,17 @@ def InvoicesLod_pdf(request, pk):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     #Header
-    p.setFillColor('#B40404')
-    p.roundRect(0, 720, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 720, 694, 150, 5, fill=1)
 
     if invoice.business.logo:
         p.drawImage('static/media/' + str(invoice.business.logo), 250, 735, width=100, height=100)
 
     p.setFont('Helvetica', 28)
-    p.setFillColor('#000')
+    p.setFillColor('#FFFFFF')
     p.drawCentredString(70, 785, "INVOICE")
 
-    p.setFillColor('#34495E')
+    p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + invoice.prefix + "-" + str(invoice.serial))
 
@@ -289,10 +287,11 @@ def InvoicesLod_pdf(request, pk):
         p.drawString(75, 560, customer.phone)'''
 
     # Footer
-    p.setFillColor('#B40404')
-    p.roundRect(0, 30, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 0, 720, 50, 5, fill=1)
     p.setFont('Helvetica', 9)
     p.setFillColorRGB(0, 0, 0)
+    p.line(0, 50, 800, 50)
     if request.user.first_name:
         user_print = request.user.first_name + " " + request.user.last_name
     else:
@@ -403,17 +402,17 @@ def PayDriverPDF(request, pk):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     # Header
-    p.setFillColor('#B40404')
-    p.roundRect(0, 720, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 720, 694, 150, 5, fill=1)
 
     if business.logo:
         p.drawImage('static/media/' + str(business.logo), 250, 735, width=100, height=100)
 
     p.setFont('Helvetica', 28)
-    p.setFillColor('#000')
+    p.setFillColor('#FFFFFF')
     p.drawCentredString(70, 785, "INVOICE")
 
-    p.setFillColor('#34495E')
+    p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + str(payment.serial))
 
@@ -466,12 +465,12 @@ def PayDriverPDF(request, pk):
 
 
     #Footer
-    p.setFillColor('#B40404')
-    p.roundRect(0, 40, 694, 10, 5, fill=1)
+          # Footer
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 0, 720, 50, 5, fill=1)
     p.setFont('Helvetica', 9)
     p.setFillColorRGB(0, 0, 0)
     p.line(0, 50, 800, 50)
-    user_print = ""
     if request.user.first_name:
         user_print = request.user.first_name + " " + request.user.last_name
     else:
@@ -600,17 +599,17 @@ def PayDispatchPDF(request, pk):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     # Header
-    p.setFillColor('#B40404')
-    p.roundRect(0, 720, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 720, 694, 150, 5, fill=1)
 
     if business.logo:
         p.drawImage('static/media/' + str(business.logo), 250, 735, width=100, height=100)
 
     p.setFont('Helvetica', 28)
-    p.setFillColor('#000')
+    p.setFillColor('#FFFFFF')
     p.drawCentredString(70, 785, "INVOICE")
 
-    p.setFillColor('#34495E')
+    p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + str(payment.serial))
 
@@ -639,12 +638,11 @@ def PayDispatchPDF(request, pk):
     p.drawString(140, 620, dispatch.name)
 
     # Footer
-    p.setFillColor('#B40404')
-    p.roundRect(0, 40, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 0, 720, 50, 5, fill=1)
     p.setFont('Helvetica', 9)
     p.setFillColorRGB(0, 0, 0)
     p.line(0, 50, 800, 50)
-    user_print = ""
     if request.user.first_name:
         user_print = request.user.first_name + " " + request.user.last_name
     else:
@@ -738,17 +736,17 @@ def PayEmployeePDF(request, pk):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     #Header
-    p.setFillColor('#B40404')
-    p.roundRect(0, 720, 694, 10, 5, fill=1)
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 720, 694, 150, 5, fill=1)
 
     if payment.business.logo:
         p.drawImage('static/media/' + str(payment.business.logo), 250, 735, width=100, height=100)
 
     p.setFont('Helvetica', 28)
-    p.setFillColor('#000')
+    p.setFillColor('#FFFFFF')
     p.drawCentredString(70, 785, "INVOICE")
 
-    p.setFillColor('#34495E')
+    p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + str(payment.serial))
 
@@ -776,13 +774,12 @@ def PayEmployeePDF(request, pk):
     p.setFont('Helvetica', 10)
     p.drawString(150, 580, employee.name+' '+employee.lastname)
 
-    #Footer
-    p.setFillColor('#B40404')
-    p.roundRect(0, 40, 694, 10, 5, fill=1)
+    # Footer
+    p.setFillColor('#FE9A2E')
+    p.roundRect(0, 0, 720, 50, 5, fill=1)
     p.setFont('Helvetica', 9)
     p.setFillColorRGB(0, 0, 0)
     p.line(0, 50, 800, 50)
-    user_print = ""
     if request.user.first_name:
         user_print = request.user.first_name + " " + request.user.last_name
     else:
