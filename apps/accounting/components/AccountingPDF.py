@@ -33,6 +33,11 @@ def Receipt_pdf(request, pk):
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + recpt.prefix + "-" + str(recpt.serial))
 
+    p.setFont('Helvetica', 12)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(50, 745, 'Date: ' + str(recpt.start_date))
+
+    p.setFillColor('#013ADF')
     p.setFont('Helvetica', 10)
     p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
     p.drawString(65, 700, recpt.business.address)
@@ -45,9 +50,6 @@ def Receipt_pdf(request, pk):
         p.drawImage('static/img/icon/Email-o.png', 50, 640, width=10, height=10)
         p.drawString(65, 640, recpt.business.email)
 
-    p.setFont('Helvetica', 12)
-    p.setFillColorRGB(0, 0, 0)
-    p.drawString(50, 745, 'Date: ' + str(recpt.invoice.start_date))
 
     # Footer
     p.setFillColor('#FE9A2E')
@@ -126,22 +128,22 @@ def Invoices_pdf(request, pk):
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. '+invoice.prefix+"-"+str(invoice.serial))
 
+    p.setFont('Helvetica', 12)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(50, 745, 'Date: ' + str(invoice.start_date))
+
+    p.setFillColor('#013ADF')
     p.setFont('Helvetica', 10)
     p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
-    p.drawString(65, 700, business.address)
+    p.drawString(65, 700, invoice.business.address)
     p.drawImage('static/img/icon/phone-o.png', 50, 680, width=10, height=10)
-    p.drawString(65, 680, business.phone)
-    if business.fax:
-      p.drawImage('static/img/icon/fax-o.png', 50, 660, width=10, height=10)
-      p.drawString(65, 660, business.fax)
-    if business.email:
+    p.drawString(65, 680, invoice.business.phone)
+    if invoice.business.fax:
+        p.drawImage('static/img/icon/fax-o.png', 50, 660, width=10, height=10)
+        p.drawString(65, 660, invoice.business.fax)
+    if invoice.business.email:
         p.drawImage('static/img/icon/Email-o.png', 50, 640, width=10, height=10)
-        p.drawString(65, 640, business.email)
-
-
-    p.setFont('Helvetica',12)
-    p.setFillColorRGB(0,0,0)
-    p.drawString(50, 745, 'Date: '+str(invoice.start_date))
+        p.drawString(65, 640, invoice.business.email)
 
     #Customer
     if customer.company_name:
@@ -252,22 +254,23 @@ def InvoicesLod_pdf(request, pk):
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + invoice.prefix + "-" + str(invoice.serial))
 
+    p.setFont('Helvetica', 11)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(410, 700, 'Week Star Date: ' + str(invoice.start_date))
+    p.drawString(410, 680, 'Week End Date: ' + str(invoice.end_date))
+
+    p.setFillColor('#013ADF')
     p.setFont('Helvetica', 10)
     p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
-    p.drawString(65, 700, business.address)
+    p.drawString(65, 700, invoice.business.address)
     p.drawImage('static/img/icon/phone-o.png', 50, 680, width=10, height=10)
-    p.drawString(65, 680, business.phone)
-    if business.fax:
+    p.drawString(65, 680, invoice.business.phone)
+    if invoice.business.fax:
         p.drawImage('static/img/icon/fax-o.png', 50, 660, width=10, height=10)
-        p.drawString(65, 660, business.fax)
-    if business.email:
+        p.drawString(65, 660, invoice.business.fax)
+    if invoice.business.email:
         p.drawImage('static/img/icon/Email-o.png', 50, 640, width=10, height=10)
-        p.drawString(65, 640, business.email)
-
-    p.setFont('Helvetica',11)
-    p.setFillColorRGB(0,0,0)
-    p.drawString(410, 700, 'Week Star Date: '+str(invoice.start_date))
-    p.drawString(410, 680, 'Week End Date: ' + str(invoice.end_date))
+        p.drawString(65, 640, invoice.business.email)
 
 
     #Customer
@@ -416,6 +419,13 @@ def PayDriverPDF(request, pk):
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + str(payment.serial))
 
+
+    p.setFont('Helvetica', 11)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(410, 700, 'Week Star Date: ' + str(payment.start_date))
+    p.drawString(410, 680, 'Week End Date: ' + str(payment.end_date))
+
+    p.setFillColor('#013ADF')
     p.setFont('Helvetica', 10)
     p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
     p.drawString(65, 700, business.address)
@@ -427,12 +437,6 @@ def PayDriverPDF(request, pk):
     if business.email:
         p.drawImage('static/img/icon/Email-o.png', 50, 640, width=10, height=10)
         p.drawString(65, 640, business.email)
-
-
-    p.setFont('Helvetica', 11)
-    p.setFillColorRGB(0, 0, 0)
-    p.drawString(410, 700, 'Week Star Date: ' + str(payment.start_date))
-    p.drawString(410, 680, 'Week End Date: ' + str(payment.end_date))
 
     # Driver
     if driver.type == 'Owner Operation':
@@ -613,6 +617,13 @@ def PayDispatchPDF(request, pk):
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + str(payment.serial))
 
+
+    p.setFont('Helvetica', 11)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(410, 700, 'Week Star Date: ' + str(payment.start_date))
+    p.drawString(410, 680, 'Week End Date: ' + str(payment.end_date))
+
+    p.setFillColor('#013ADF')
     p.setFont('Helvetica', 10)
     p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
     p.drawString(65, 700, business.address)
@@ -624,11 +635,6 @@ def PayDispatchPDF(request, pk):
     if business.email:
         p.drawImage('static/img/icon/Email-o.png', 50, 640, width=10, height=10)
         p.drawString(65, 640, business.email)
-
-    p.setFont('Helvetica', 11)
-    p.setFillColorRGB(0, 0, 0)
-    p.drawString(410, 700, 'Week Star Date: ' + str(payment.start_date))
-    p.drawString(410, 680, 'Week End Date: ' + str(payment.end_date))
 
     # Dispatch
     p.setFillColor('#34495E')
@@ -750,6 +756,13 @@ def PayEmployeePDF(request, pk):
     p.setFont('Helvetica-Bold', 12)
     p.drawString(50, 760, 'No. ' + str(payment.serial))
 
+
+    p.setFont('Helvetica', 11)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(400, 680, 'Period Star Date: ' + str(payment.start_date))
+    p.drawString(400, 660, 'Period End Date: ' + str(payment.end_date))
+
+    p.setFillColor('#013ADF')
     p.setFont('Helvetica', 10)
     p.drawImage('static/img/icon/address-o.png', 50, 700, width=10, height=10)
     p.drawString(65, 700, payment.business.address)
@@ -761,11 +774,6 @@ def PayEmployeePDF(request, pk):
     if payment.business.email:
         p.drawImage('static/img/icon/Email-o.png', 50, 640, width=10, height=10)
         p.drawString(65, 640, payment.business.email)
-
-    p.setFont('Helvetica', 11)
-    p.setFillColorRGB(0, 0, 0)
-    p.drawString(400, 680, 'Period Star Date: ' + str(payment.start_date))
-    p.drawString(400, 660, 'Period End Date: ' + str(payment.end_date))
 
     # Employee
     p.setFillColor('#34495E')
