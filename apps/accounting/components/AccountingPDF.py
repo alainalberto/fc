@@ -31,7 +31,7 @@ def Receipt_pdf(request, pk):
 
     p.setFillColor('#FFFFFF')
     p.setFont('Helvetica-Bold', 12)
-    p.drawString(50, 760, 'No. ' + recpt.prefix + "-" + str(recpt.serial))
+    p.drawString(50, 760, 'No. '+ str(recpt.serial))
 
     p.setFont('Helvetica', 12)
     p.setFillColorRGB(0, 0, 0)
