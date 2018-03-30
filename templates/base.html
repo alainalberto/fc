@@ -40,7 +40,7 @@
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
     <![endif]-->
-    {% block extrastyle %}{% endblock %}
+
     <!-- Morris Charts JavaScript -->
 
 
@@ -400,5 +400,6 @@
 <script src="{% static 'js/bootstrap-switch.min.js'%}"></script>
 <script src="{% static 'js/datetimepicker.min.js'%}"></script>
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+{% block extrastyle %}{% endblock %}
 </body>
 </html>
