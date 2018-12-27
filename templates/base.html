@@ -35,7 +35,7 @@
     <link rel="icon" type="image/ico" href="{% static '/img/icon/Icon.ico'%}">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <!-- Morris Charts CSS -->
-    <link href="{% static 'lib/morris/morris.css'%}" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -205,12 +205,6 @@
                             <a class="item" href="{% url 'accounting:invoices' %}"> Invoices Services</a>
                         </li>
                         {% endif %}
-
-                        {% if perms.logistic and perms.accounting.add_invoice %}
-                        <li>
-                            <a class="item" href="{% url 'accounting:invoices_log' %}"> Invoices Load</a>
-                        </li>
-                        {% endif %}
                         {% if perms.accounting.add_receipt %}
                         <li>
                             <a class="item" href="{% url 'accounting:receipts' %}"> Receipts</a>
@@ -228,7 +222,7 @@
                         {% endif %}
                         {% if perms.accounting.add_account %}
                         <li>
-                            <a class="item" href="{% url 'accounting:panel_account' %}"> Statistic</a>
+                            <a class="item" href="{% url 'accounting:account_filter' %}"> Statistic</a>
                         </li>
                         {% endif %}
                     </ul>
@@ -293,6 +287,11 @@
                         {% if perms.logistic.add_load %}
                         <li>
                             <a class="item" href="{% url 'logistic:loads' %}"> Loads</a>
+                        </li>
+                        {% endif %}
+                        {% if perms.logistic and perms.accounting.add_invoice %}
+                        <li>
+                            <a class="item" href="{% url 'accounting:invoices_log' %}"> Invoices Load</a>
                         </li>
                         {% endif %}
                         {% if perms.logistic.add_driverslogt %}
@@ -400,6 +399,8 @@
 <script src="{% static 'js/bootstrap-switch.min.js'%}"></script>
 <script src="{% static 'js/datetimepicker.min.js'%}"></script>
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 {% block extrastyle %}{% endblock %}
 </body>
 </html>

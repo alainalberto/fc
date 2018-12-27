@@ -5,7 +5,9 @@ from django.views.generic.dates import ArchiveIndexView
 from apps.accounting.components.AccountingPDF import Receipt_pdf, Invoices_pdf, InvoicesLod_pdf
 
 urlpatterns = [
-    url(r'^accounts/statistic/$', login_required(AccountingPanel), name='panel_account'),
+    #Statistic
+    url(r'^accounts/statistic/(?P<start>[^/]+)&(?P<end>[^/]+)/$', login_required(AccountingPanel), name='panel_account'),
+    url(r'^accounts/statistic/$', login_required(AccountingFilter), name='account_filter'),
 
     #Account
     url(r'^accounts/$', login_required(permission_required('accounting.add_account')(AccountsViews)), name='accounts'),

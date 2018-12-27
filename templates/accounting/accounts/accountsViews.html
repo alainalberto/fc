@@ -19,28 +19,55 @@
           <tooltip md-direction="left">New</tooltip>
         </a>
       </div>
+      {% for b in business %}
+      <div>
+        <div class="col-md-4 col-md-offset-4">
+          <strong>{{ b }}</strong>
+        </div>
       <br/>
+        <strong>INCOMES</strong>
         <ol class="ui list">
-          {% if primary %}
-         {% for prim in primary %}
-          <li><strong>{{prim.name}}</strong><ol>
+            <ol>
             {% for acin in accounts %}
-            {% if acin.accounts_id_id == prim.id_acn %}
-            <li><a href="{% url 'accounting:account_descrip' acin.id_acn %}"><strong>{{acin.name}}</strong> ( {{acin.business}} )</a><ol>
+              {% if acin.transaction == 1 and acin.business == b%}
+            {% if acin.accounts_id_id %}
+            <li><a href="{% url 'accounting:account_descrip' acin.id_acn %}"><strong>{{acin.name}}</strong></a>
+              <ol>
               {% for sacin in accounts %}
-              {% if sacin.accounts_id_id == acin.id_acn %}
+              {% if sacin.accounts_id_id == acin.id_acn and acin.business == b%}
               <li><a href="{% url 'accounting:account_descrip' sacin.id_acn%}">{{sacin.name}}</a></li>
               {% endif %}
               {% endfor %}
             </ol>
             </li>
             {% endif %}
+              {% endif %}
             {% endfor %}
           </ol>
-          </li>
-            {% endfor %}
-          {% endif %}
         </ol>
+       <br/>
+        <strong>EXPENSES</strong>
+        <ol class="ui list">
+            <ol>
+            {% for acin in accounts %}
+              {% if acin.transaction == 0 and acin.business == b %}
+            {% if acin.accounts_id_id %}
+            <li><a href="{% url 'accounting:account_descrip' acin.id_acn %}"><strong>{{acin.name}}</strong></a>
+              <ol>
+              {% for sacin in accounts %}
+              {% if sacin.accounts_id_id == acin.id_acn and acin.business == b %}
+              <li><a href="{% url 'accounting:account_descrip' sacin.id_acn%}">{{sacin.name}}</a></li>
+              {% endif %}
+              {% endfor %}
+            </ol>
+            </li>
+            {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ol>
+        </ol>
+      </div>
+       {% endfor %}
       </div>
     <div class="panel-footer">
             <a type="button" onclick="history.back(-1)">

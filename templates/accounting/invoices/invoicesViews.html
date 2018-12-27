@@ -22,6 +22,9 @@
             </div>
             <br/>
             {% endif %}
+            <div>
+               {% for b in business %}
+                <p class="bg-info text-center"><strong>{{ b }}</strong></p>
             <div class="table-responsive">
                 <table id="listInvoices" class="table data-table table-striped table-bordered table-hover" cellspacing="0" width="100%">
                     <thead>
@@ -30,51 +33,55 @@
                         <th class="col-md-1">Serial</th>
                         <th class="col-md-2">Customers</th>
                         <th class="col-md-2">Company Name</th>
-                        <th class="col-md-1">Business</th>
                         <th class="col-md-1">Start Date</th>
                         <th class="col-md-1">Payment Method</th>
                         <th class="col-md-1">Paid</th>
-                        <th class="col-md-2">Action</th>
+                        <th class="col-md-1">Total</th>
+                        <th class="col-md-1">Action</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for i in object_list %}
+                    {% if i.business == b %}
                     <tr>
                         <td>{{i.prefix}}</td>
                         <td><a href="{% url 'accounting:invoices_view' i.id_inv %}">{{i.serial}}</a></td>
                         <td>{{i.customers}}</td>
                         <td>{{i.customers.company_name}}</td>
-                        <td>{{i.business}}</td>
                         <td>{{i.start_date}}</td>
                         <td>{{i.waytopay}}</td>
                         <td class="text-center">{% if i.paid %}<i class="fa fa-check text-success" aria-hidden="true"></i>{% endif %}</td>
+                        <td>{{i.total}}</td>
                         <td>
                             {% if perms.accounting.change_invoice %}
                             <toolbar class="md-accent">
-                                <a data-type="info" data-trigger="focus" title="Edit Invoices" data-animation="am-flip-x" type="button" class="btn btn-primary test-tooltip glyphicon glyphicon-edit" href="{% url 'accounting:invoices_edit' i.id_inv %}" {% if not perms.accounting.change_invoice %} disabled {% endif %}>
+                                <a data-type="info" data-trigger="focus" title="Edit Invoices" data-animation="am-flip-x" type="button" class=" text-primary test-tooltip glyphicon glyphicon-edit" href="{% url 'accounting:invoices_edit' i.id_inv %}" {% if not perms.accounting.change_invoice %} disabled {% endif %}>
                                 </a>
                             </toolbar>
                             {% endif %}
                             {% if perms.accounting.delete_invoice %}
                             <toolbar class="md-accent">
-                                <a data-type="info" data-animation="am-flip-x" data-trigger="focus" title="Delete Invoices" type="button" class="btn btn-danger test-tooltip glyphicon glyphicon-trash" href="{% url 'accounting:invoices_delete' i.id_inv %}" {% if not perms.accounting.delete_invoice %} disabled {% endif %}>
+                                <a data-type="info" data-animation="am-flip-x" data-trigger="focus" title="Delete Invoices" type="button" class=" text-danger test-tooltip glyphicon glyphicon-trash" href="{% url 'accounting:invoices_delete' i.id_inv %}" {% if not perms.accounting.delete_invoice %} disabled {% endif %}>
                                </a>
                             </toolbar>
                             {% endif %}
                             {% if perms.accounting.add_invoice %}
                              <toolbar class="md-accent">
-                                <a data-type="info" data-animation="am-flip-x" target="_blank" data-trigger="focus" title="Print Invoice" type="button" class="btn btn-primary test-tooltip glyphicon glyphicon-print" href="{% url 'accounting:invoices_pdf' i.id_inv %}">
+                                <a data-type="info" data-animation="am-flip-x" target="_blank" data-trigger="focus" title="Print Invoice" type="button" class=" text-primary test-tooltip glyphicon glyphicon-print" href="{% url 'accounting:invoices_pdf' i.id_inv %}">
                                 </a>
                             </toolbar>
                             {% endif %}
                         </td>
 
                     </tr>
+                    {% endif %}
                     {% endfor %}
                     </tbody>
 
                 </table>
             </div>
+            </div>
+            {% endfor %}
             </div>
         <div class="panel-footer">
             <a type="button" onclick="history.back(-1)">

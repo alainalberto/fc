@@ -128,7 +128,7 @@ if socket.gethostname() == 'Ransel-PC' or socket.gethostname() == 'alain-HP-Note
    DATABASES = {
       'default': {
          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-         'NAME': 'db_muestra',
+         'NAME': 'db_muestra2',
          'USER': 'administrator',
          'PASSWORD': 'admin*2017',
          'HOST': 'localhost',

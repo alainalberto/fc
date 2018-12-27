@@ -37,18 +37,21 @@ class AccountForm(forms.ModelForm):
             'name',
             'description',
             'accounts_id',
+            'transaction',
             'business'
         ]
         labels = {
             'name': 'Name:',
             'description': 'Description:',
             'accounts_id': 'Main Account:',
+            'transaction': 'Transaction',
             'business': 'Bussines:'
         }
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Name', 'class': 'form-control input-md upper'}),
             'description': forms.TextInput(attrs={'placeholder': 'Description', 'class': 'form-control input-md upper'}),
             'accounts_id': forms.Select(attrs={'class': 'form-control input-md'}),
+            'transaction': forms.Select(attrs={'class': 'form-control input-md'},choices=(('1','Income'),('0','Expense'))),
             'business': forms.Select(attrs={'class': 'form-control input-md'}),
         }
 
@@ -167,6 +170,9 @@ class InvoicesForm(forms.ModelForm):
                 'comission_fee',
                 'wire_fee',
                 'ach_fee',
+                'pay',
+                'last_pay_date',
+                'pay_pending',
                 'note',
             ]
             labels = {
@@ -179,6 +185,9 @@ class InvoicesForm(forms.ModelForm):
                 'end_date': 'End Date:',
                 'subtotal': 'Subtotal:',
                 'total': 'Total:',
+                'pay': 'Pay',
+                'last_pay_date': 'Last Pay Date:',
+                'pay_pending': 'Pay Pending:',
             }
             widgets = {
                 'business': forms.Select(attrs={'class': 'form-control input-md'}),
@@ -195,6 +204,9 @@ class InvoicesForm(forms.ModelForm):
                 'wire_fee': forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-control wire fee'}),
                 'ach_fee': forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-control ach fee'}),
                 'note': forms.Textarea(attrs={'class': 'form-control input-md upper'}),
+                'pay': forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-control pay'}),
+                'last_pay_date': forms.DateInput(attrs={'placeholder': 'Last Pay Date', 'class': 'form-control input-md'}),
+                'pay_pending': forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-control pending text-danger', 'readonly':''}),
             }
 
 class ItemHasInvoiceForm(forms.ModelForm):
@@ -204,6 +216,7 @@ class ItemHasInvoiceForm(forms.ModelForm):
         fields = {
             'id_ind',
             'quantity',
+            'accounts',
             'description',
             'value',
             'tax',
@@ -212,6 +225,7 @@ class ItemHasInvoiceForm(forms.ModelForm):
         widgets = {
             'id_ind': forms.NumberInput(attrs={'placeholder': '0', 'class': 'form-control', 'style':'display : none'}),
             'quantity': forms.NumberInput(attrs={'placeholder': '0', 'class': 'form-control entrada'}),
+            'accounts': forms.Select(choices=Account.objects.filter(transaction=1)),
             'description': forms.TextInput(attrs={'placeholder': 'Description ', 'class': 'form-control input-md descript'}),
             'value': forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-control precie'}),
             'tax': forms.NumberInput(attrs={'placeholder': '0.00', 'class': 'form-control tax'}),
@@ -228,6 +242,7 @@ class ReceiptsForm(forms.ModelForm):
             'business',
             'start_date',
             'waytopay',
+            'accounts',
             'paid',
             'end_date',
             'description',
@@ -238,6 +253,7 @@ class ReceiptsForm(forms.ModelForm):
             'start_date': 'Start Date:',
             'waytopay': 'Payment Method:',
             'paid': 'Paid:',
+            'accounts': 'Account',
             'end_date': 'End Date:',
             'description': 'Description',
             'total': 'Total:',
@@ -247,6 +263,7 @@ class ReceiptsForm(forms.ModelForm):
             'start_date': forms.DateInput(attrs={'placeholder': 'Start Date', 'class': 'form-control input-md'}),
             'waytopay': forms.Select(attrs={'class': 'form-control input-md'},
                                      choices=(('Cash', 'Cash'), ('Check', 'Check'), ('Credit Card', 'Credit Card'))),
+            'accounts': forms.Select(choices= Account.objects.filter(transaction=0)),
             'paid': forms.CheckboxInput(attrs={'class': 'checkbox'}),
             'end_date': forms.DateInput(attrs={'placeholder': 'End Date', 'class': 'form-control input-md'}),
             'description': forms.Textarea(attrs={'placeholder': 'Description', 'class': 'form-control input-md'}),

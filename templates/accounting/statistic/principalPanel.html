@@ -1,67 +1,59 @@
 {% extends 'base.html' %}
 {% block extrastyle %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.js"></script>
 <script type="text/javascript">
-        var ctx = document.getElementById("st-bybusiness");
-        var incomes = JSON.parse('{{ incomes_total_j }}');
-        var expenses = JSON.parse('{{ expenses_total_j }}');
-         var earning = JSON.parse('{{ earning_total_j }}');
-        var productsChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                   labels: {'Incomes', 'Expenses', 'Earning'}
-                   datasets: [{
-                               label: 'Produtos',
-                               data: incomes, expenses, earning
-                               backgroundColor: [
-                                     'rgba(255, 99, 132, 0.2)',
-                                     'rgba(54, 162, 235, 0.2)',
-                                     'rgba(255, 206, 86, 0.2)',
-                                     'rgba(75, 192, 192, 0.2)',
-                                     'rgba(153, 102, 255, 0.2)',
-                                     'rgba(255, 159, 64, 0.2)'
-                               ],
-                               borderColor: [
-                                  'rgba(255,99,132,1)',
-                                  'rgba(54, 162, 235, 1)',
-                                  'rgba(255, 206, 86, 1)',
-                                  'rgba(75, 192, 192, 1)',
-                                  'rgba(153, 102, 255, 1)',
-                                  'rgba(255, 159, 64, 1)'
-                               ],
-                               borderWidth: 1
-                   }]
-            },
-            options: {
-                scales: {
-                   yAxes: [{
-                      ticks: {
-                         beginAtZero:true
-                      }
-                   }]
-                }
-            }
-        });
-    </script>
+    $(document).ready(function()
+{
+ {% for b in business %}
+  var total_cash = 0;
+  var total_check = 0;
+  var total_credit = 0;
+  var total_total = 0;
+  var total_pend = 0;
+  var total_inv = 0;
+
+  $('#tbinc{{b.id_bus}} tbody').find('tr').each(function () {
+         total_cash += parseFloat($(this).find('.cash').text());
+         total_check += parseFloat($(this).find('.check').text());
+         total_credit += parseFloat($(this).find('.credit').text());
+         total_total += parseFloat($(this).find('.subtotal').text());
+    });
+
+    $('#tbinc{{b.id_bus}} tfoot tr th strong samp').eq(0).text(total_cash.toFixed( 2 ));
+    $('#tbinc{{b.id_bus}} tfoot tr th strong samp').eq(1).text(total_check.toFixed( 2 ));
+    $('#tbinc{{b.id_bus}} tfoot tr th strong samp').eq(2).text(total_credit.toFixed( 2 ));
+    $('#tbinc{{b.id_bus}} tfoot tr th strong samp').eq(3).text(total_total.toFixed( 2 ));
+
+  $('#tbexp{{b.id_bus}} tbody').find('tr').each(function () {
+         total_cash += parseFloat($(this).find('.cash').text());
+         total_check += parseFloat($(this).find('.check').text());
+         total_credit += parseFloat($(this).find('.credit').text());
+         total_total += parseFloat($(this).find('.subtotal').text());
+    });
+
+    $('#tbexp{{b.id_bus}} tfoot tr th strong samp').eq(0).text(total_cash.toFixed( 2 ));
+    $('#tbexp{{b.id_bus}} tfoot tr th strong samp').eq(1).text(total_check.toFixed( 2 ));
+    $('#tbexp{{b.id_bus}} tfoot tr th strong samp').eq(2).text(total_credit.toFixed( 2 ));
+    $('#tbexp{{b.id_bus}} tfoot tr th strong samp').eq(3).text(total_total.toFixed( 2 ));
+
+    $('#tbinv{{b.id_bus}} tbody').find('tr').each(function () {
+         total_pend += parseFloat($(this).find('.pending').text());
+         total_inv += parseFloat($(this).find('.subtotal').text());
+    });
+
+    $('#tbinv{{b.id_bus}} tfoot tr th strong samp').eq(0).text(total_pend.toFixed( 2 ));
+    $('#tbinv{{b.id_bus}} tfoot tr th strong samp').eq(1).text(total_inv.toFixed( 2 ));
+
+
+   {% endfor %}
+});
+</script>
 {% endblock %}
 {% block content %}
-
-<div class="row">
-
-    <div class="col-lg-12">
-        <p class="bg-primary text-center">General</p>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Method Pay </h3>
-            </div>
-            <div class="panel-body">
-                 <canvas id="st-bybusiness"></canvas>
-                {% include 'accounting/statistic/accountPayMethod.html'%}
-            </div>
-        </div>
-    </div>
+<div class="">
+    <a type="button" href="{% url 'accounting:account_filter' %}">
+        <i class="fa fa-arrow-circle-left fa-3x"></i>
+    </a>
 </div>
-<br/>
 <div class="row">
     <div class="col-lg-12">
         <p class="bg-primary text-center">By Business</p>
@@ -70,10 +62,182 @@
                 <h3 class="panel-title"><i class="fa fa-bar-chart"></i> Balance Business</h3>
             </div>
             <div class="panel-body">
-                {% include 'accounting/statistic/accountByBusiness.html'%}
+                {% for bus in business %}
+                <div class="col-lg-6 col-md-6">
+                    <p class="bg-primary text-center">{{bus.name}}</p>
+                    <div class="table-responsive">
+                        <table id="tbgnl" class="table data-table table-bordered table-hover table-striped">
+                            <thead>
+                            <tr>
+                                <th>Incomes</th>
+                                <th>Expenses</th>
+                                <th>Earning</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for b in balance %}
+                            {% if bus == b.business %}
+                            <tr>
+                                <td>$ {{b.incomes|default:'0'}}</td>
+                                <td>$ {{b.expenses|default:'0'}}</td>
+                                <td {% if b.earning < 0 %} class="danger" {% endif %}>$ {{b.earning|default:'0'}}</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-lg-12">
+        <p class="bg-primary text-center">General</p>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Method Pay </h3>
+            </div>
+            <div class="panel-body">
+                {% for b in business %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <p class="bg-primary text-center">{{b}} </p>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <p class="bg-primary text-center">INCOMES</p>
+                        <div class="table-responsive">
+                            <table id="tbinc{{b.id_bus}}" class="table data-table table-bordered table-hover table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Cash</th>
+                                    <th>Check</th>
+                                    <th>Credit Card</th>
+                                    <th>Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for a in incomes %}
+                                {% if a.account.business == b %}
+                                <tr>
+                                    <td >{{a.account}}</td>
+                                    <td class="cash">{{a.cash.total|default:'0'}}</td>
+                                    <td class="check">{{a.check.total|default:'0'}}</td>
+                                    <td class="credit">{{a.credit.total|default:'0'}}</td>
+                                    <td class="subtotal">{{ a.total }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <th><strong> </strong></th>
+                                    <th><strong>$ <samp>0</samp></strong></th>
+                                    <th><strong>$ <samp>0</samp></strong></th>
+                                    <th><strong>$ <samp>0</samp></strong></th>
+                                    <th><strong>$ <samp>0</samp></strong></th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <p class="bg-primary text-center">EXPENSES</p>
+                        <div class="table-responsive">
+                            <table id="tbexp{{b.id_bus}}" class="table data-table table-bordered table-hover table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Cash</th>
+                                    <th>Check</th>
+                                    <th>Credit Card</th>
+                                    <th>Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for a in expenses %}
+                                {% if a.account.business == b %}
+                                <tr>
+                                    <td>{{a.account}}</td>
+                                    <td class="cash">{{a.cash.total|default:'0'}}</td>
+                                    <td class="check">{{a.check.total|default:'0'}}</td>
+                                    <td class="credit">{{a.credit.total|default:'0'}}</td>
+                                    <td class="subtotal">{{ a.total }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                </tbody>
+                                <tr class="total">
+                                    <td><strong> </strong></td>
+                                    <td><strong>$ <samp>0</samp></strong></td>
+                                    <td><strong>$ <samp>0</samp></strong></td>
+                                    <td><strong>$ <samp>0</samp></strong></td>
+                                    <td><strong>$ <samp>0</samp></strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Invoices Pending </h3>
+            </div>
+            <div class="panel-body">
+                {% for b in business %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <p class="bg-primary text-center">{{b}} </p>
+                    </div>
+                    <div class="col-lg-12 col-md-12">
+                        <div class="table-responsive">
+                            <table id="tbinv{{b.id_bus}}" class="table data-table table-bordered table-hover table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Date last Pay</th>
+                                    <th>Pending Pay</th>
+                                    <th>Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for i in invoices %}
+                                {% if i.business == b %}
+                                {% if not i.pay_pending == None%}
+                                <tr>
+                                    <td class="customer">{{i.customers}}</td>
+                                    <td class="lastpay">{{i.last_pay_date|default:'0000/00/00'}}</td>
+                                    <td class="pending">{{i.pay_pending|default:'0'}}</td>
+                                    <td class="subtotal">{{ i.total|default:'0' }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th><strong>$ <samp>0</samp></strong></th>
+                                    <th><strong>$ <samp>0</samp></strong></th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+
 
 {% endblock %}

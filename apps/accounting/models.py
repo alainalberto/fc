@@ -13,9 +13,13 @@ from datetime import datetime
 
 class Waytopay(models.Manager):
     def get_waytopay(self,methodo, account):
-        return self.filter(waytopay=methodo, accounts_id=account).aggregate(total=Sum('value'))
+        return self.filter(waytopay=methodo, accounts=account).aggregate(total=Sum('value'))
 
-class TotalAcount(models.Manager):
+    def get_waytopay_date(self,methodo, account, ds, de):
+        start_date = ds
+        end_date = de
+        return self.filter(date__range=(start_date, end_date), waytopay=methodo, accounts=account).aggregate(total=Sum('value'))
+
     def get_totalaount(self, type):
         accounts = []
         acontype = Account.objects.filter(primary=True, name=type)
@@ -49,6 +53,7 @@ class Account(models.Model):
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=255, blank=True, null=True)
     primary = models.BooleanField(default=False)
+    transaction = models.IntegerField(default=1, blank=True, null=True)
 
     def __str__(self):
         return '{}'.format(self.name)
@@ -114,6 +119,9 @@ class Invoice(models.Model):
     prefix = models.CharField(max_length=4, default='inv')
     end_date = models.DateField(blank=True, null=True)
     note = models.CharField(max_length=200, blank=True, null=True)
+    pay = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    last_pay_date = models.DateField(blank=True, null=True)
+    pay_pending = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
         return '{}'.format(self.serial)
