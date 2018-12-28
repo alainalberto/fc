@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=20)),
                 ('description', models.CharField(blank=True, max_length=255, null=True)),
                 ('primary', models.BooleanField(default=False)),
+                ('transaction', models.IntegerField(blank=True, default=1, null=True)),
             ],
         ),
         migrations.CreateModel(

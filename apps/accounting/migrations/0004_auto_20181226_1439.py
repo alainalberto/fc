@@ -12,11 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='account',
-            name='transaction',
-            field=models.IntegerField(blank=True, default=1, null=True),
-        ),
+        
         migrations.AddField(
             model_name='invoice',
             name='last_pay_date',
