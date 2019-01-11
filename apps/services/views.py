@@ -49,6 +49,56 @@ def PermitView(request, pk, popup):
     permit = Permit.objects.get(id_com=pk)
     return render(request, 'services/permit/permitView.html', {'permit': permit, 'is_popup':popup, 'title':'Permit', 'deactivate':True})
 
+def StatisticView(request):
+    context = []
+    insuranse = Insurance.objects.all()
+    pendi = []
+    for i in insuranse:
+        if  i.balance_due:
+            pendi.append(i)
+
+    if request.method == 'POST':
+        start = datetime.strptime(request.POST.get('start', None), "%Y-%m-%d").date()
+        end = datetime.strptime(request.POST.get('end', None), "%Y-%m-%d").date()
+        insuranse = Insurance.objects.all()
+        exp = []
+        for i in insuranse:
+            if i.balance_due:
+                pendi.append(i)
+            if i.policy_date_exp:
+                if i.policy_date_exp >= start and i.policy_date_exp <= end :
+                    exp.append(i)
+                elif i.policy_cargo_exp:
+                    if i.policy_cargo_exp >= start and i.policy_cargo_exp <= end:
+                        exp.append(i)
+                    elif i.policy_physical_exp:
+                        if i.policy_physical_exp >= start and i.policy_physical_exp <= end:
+                            exp.append(i)
+                elif i.policy_physical_exp:
+                    if i.policy_physical_exp >= start and i.policy_physical_exp <= end:
+                        exp.append(i)
+            elif i.policy_cargo_exp:
+                 if i.policy_cargo_exp>= start and i.policy_cargo_exp <= end:
+                     exp.append(i)
+                 elif i.policy_physical_exp:
+                     if i.policy_physical_exp >= start and i.policy_physical_exp <= end:
+                         exp.append(i)
+            elif i.policy_physical_exp:
+                if i.policy_physical_exp >= start and i.policy_physical_exp <= end:
+                    exp.append(i)
+        context = {
+            'pendipay': pendi,
+            'insurances': exp
+        }
+        return render(request, 'services/statistic/principalPanel.html', context)
+
+    context = {
+        'pendipay' : pendi,
+        'insurances' : insuranse
+    }
+
+    return render(request, 'services/statistic/principalPanel.html', context)
+
 
 def SelectView(request, pk):
 

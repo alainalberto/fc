@@ -123,7 +123,7 @@
                                 {% for a in incomes %}
                                 {% if a.account.business == b %}
                                 <tr>
-                                    <td >{{a.account}}</td>
+                                    <td>{{a.account}}</td>
                                     <td class="cash">{{a.cash.total|default:'0'}}</td>
                                     <td class="check">{{a.check.total|default:'0'}}</td>
                                     <td class="credit">{{a.credit.total|default:'0'}}</td>
@@ -211,7 +211,7 @@
                                 {% if i.business == b %}
                                 {% if not i.pay_pending == None%}
                                 <tr>
-                                    <td class="customer">{{i.customers}}</td>
+                                    <td class="customer"><a href="{% url 'accounting:invoices_view' i.id_inv %}">{{i.customers}}</a></td>
                                     <td class="lastpay">{{i.last_pay_date|default:'0000/00/00'}}</td>
                                     <td class="pending">{{i.pay_pending|default:'0'}}</td>
                                     <td class="subtotal">{{ i.total|default:'0' }}</td>
