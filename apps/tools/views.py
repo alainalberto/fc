@@ -124,6 +124,7 @@ def Message(request):
 def panel_view(request):
     incomes = []
     expenses = []
+    business = Busines.objects.filter(deactivated=False)
     cash_i_total = {'total': 0}
     credit_i_total = {'total': 0}
     check_i__total = {'total': 0}
@@ -132,10 +133,24 @@ def panel_view(request):
     check_e__total = {'total': 0}
     income_total = {'total': 0}
     expenses_total = {'total': 0}
-
+    date_now = datetime.now().date()
+    start_date = date_now - timedelta(days=90)
+    end_date = date_now
+    invoices = Invoice.objects.filter(start_date__range=(start_date, end_date))
     alert=[]
+    user_group = request.user.groups.all()
+    alertUrg = Alert.objects.filter(category='Urgents').order_by('end_date')
     inc = Account.objects.filter(primary=False, accounts_id = 1)
     exp = Account.objects.filter(primary=False, accounts_id=2)
+    permits = Permit.objects.filter(state='Pending')
+    insurance = Insurance.objects.filter(state='Pending')
+    pendis = []
+    equipment = Equipment.objects.filter(state='Pending')
+    ifta = Ifta.objects.filter(state='Pending')
+    contract = Contract.objects.filter(state='Pending')
+    audit = Audit.objects.filter(state='Pending')
+
+    #Accounting
     for i in inc:
         cash_i = {'total': 0}
         credit_i = {'total': 0}
@@ -168,21 +183,20 @@ def panel_view(request):
         credit_e_total['total'] += credit_e['total']
         check_e__total['total'] += check_e['total']
         expenses_total['total'] = (cash_e_total['total']) + (credit_e_total['total']) + (check_e__total['total'])
-    date_now = datetime.now().date()
-    user_group = request.user.groups.all()
-    alertUrg = Alert.objects.filter(category='Urgents').order_by('end_date')
+    #Alert
     for u in alertUrg:
         for g in user_group:
             if u.group.filter(name=g.name).exists():
                if u.show_date <= date_now and u.end_date >= date_now:
                   alert.append(u)
-    permit = Permit.objects.all()
-    insurance = Insurance.objects.all()
-    equipment = Equipment.objects.all()
-    ifta = Ifta.objects.all()
-    contract = Contract.objects.all()
-    audit = Audit.objects.all()
+
     # driver = Driver.objects.all()
+
+    #Isurance
+    for i in insurance:
+        if i.balance_due:
+            pendis.append(i)
+
     contexto = {'incomes': incomes,
                 'expenses': expenses,
                 'cash_i_total': cash_i_total,
@@ -193,7 +207,7 @@ def panel_view(request):
                 'check_e_total': check_e__total,
                 'expenses_total':expenses_total,
                 'income_total': income_total,
-                'permits': permit,
+                'permits': permits,
                 'insurances': insurance,
                 'equipments': equipment,
                 'contracts': contract,
@@ -201,7 +215,10 @@ def panel_view(request):
                 #'drives': driver,
                 'audits': audit,
                 'alert': pagination(request, alert),
-                'date_now': date_now}
+                'date_now': date_now,
+                'invoices': invoices,
+                'business': business,
+                'pendipay': pendis}
     return render(request, 'home/complement/panel.html', contexto)
 
 class PostCalendar(CreateView):

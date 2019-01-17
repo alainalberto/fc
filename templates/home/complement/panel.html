@@ -7,6 +7,22 @@
 <script src="{% static 'lib/calendar/fullcalendar.min.js' %}"></script>
 <script type="text/javascript">
  $(document).ready( function () {
+
+     {% for b in business %}
+  var total_pend = 0;
+  var total_inv = 0;
+
+    $('#tbinv{{b.id_bus}} tbody').find('tr').each(function () {
+         total_pend += parseFloat($(this).find('.pending').text());
+         total_inv += parseFloat($(this).find('.subtotal').text());
+    });
+
+    $('#tbinv{{b.id_bus}} tfoot tr th strong samp').eq(0).text(total_pend.toFixed( 2 ));
+    $('#tbinv{{b.id_bus}} tfoot tr th strong samp').eq(1).text(total_inv.toFixed( 2 ));
+
+
+   {% endfor %}
+
      $('#calendar_panel').fullCalendar({
 			header: {
 				left: 'prev,next',
@@ -74,29 +90,29 @@
 
                     </div>
                     <nav class="col-md-offset-9" aria-label="Page navigation">
-                <ul class="pager">
-                    {% if alert.has_previous %}
-                    <li>
-                        <a  href="?page={{ alert.previous_page_number }}"><span>
-                            <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-                        </span>
-                        </a>
-                    </li>
-                    {% endif %}
-                    <span class="current">
-                        Page {{ alert.number }} of {{ alert.paginator.num_pages }}.
-                    </span>
-                    {% if alert.has_next %}
-                    <li>
-                        <a href="?page={{ alert.next_page_number }}">
-                            <span>
-                                <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                        <ul class="pager">
+                            {% if alert.has_previous %}
+                            <li>
+                                <a  href="?page={{ alert.previous_page_number }}"><span>
+                                    <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+                                </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <span class="current">
+                                Page {{ alert.number }} of {{ alert.paginator.num_pages }}.
                             </span>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                            {% if alert.has_next %}
+                            <li>
+                                <a href="?page={{ alert.next_page_number }}">
+                                    <span>
+                                        <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+                                    </span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                 </div>
 
             </div>
@@ -329,7 +345,7 @@
     {% endif %}
     {% if perms.accounting.account %}
 
-        <!--<div class="col-lg-3">
+    <!--<div class="col-lg-3">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title"><i class="fa fa-clock-o fa-fw"></i> Recent Actions panel</h3>
@@ -369,11 +385,108 @@
                 <h3 class="panel-title"><i class="fa fa-money fa-fw"></i><a class="item" href=""> Stadistic Panel Accounts</a></h3>
             </div>
             <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Invoices Pending </h3>
+                    </div>
+                    <div class="panel-body">
+                        {% for b in business %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p class="bg-primary text-center">{{b}} </p>
+                            </div>
+                            <div class="col-lg-12 col-md-12">
+                                <div class="table-responsive">
+                                    <table id="tbinv{{b.id_bus}}" class="table data-table table-bordered table-hover table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Date last Pay</th>
+                                            <th>Pending Pay</th>
+                                            <th>Total</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for i in invoices %}
+                                        {% if i.business == b %}
+                                        {% if not i.pay_pending == None%}
+                                        <tr>
+                                            <td class="customer"><a href="{% url 'accounting:invoices_view' i.id_inv %}">{{i.customers}}</a></td>
+                                            <td class="lastpay">{{i.last_pay_date|default:'0000/00/00'}}</td>
+                                            <td class="pending">{{i.pay_pending|default:'0'}}</td>
+                                            <td class="subtotal">{{ i.total|default:'0' }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th><strong>$ <samp>0</samp></strong></th>
+                                            <th><strong>$ <samp>0</samp></strong></th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Invoices Pending </h3>
+                    </div>
+                    <div class="panel-body">
+                        {% for b in business %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p class="bg-primary text-center">{{b}} </p>
+                            </div>
+                            <div class="col-lg-12 col-md-12">
+                                <div class="table-responsive">
+                                    <table id="tbins{{b.id_bus}}" class="table data-table table-bordered table-hover table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Date last Pay</th>
+                                            <th>Pending Pay</th>
+                                            <th>Total</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for i in invoices %}
+                                        {% if i.business == b %}
+                                        {% if not i.pay_pending == None%}
+                                        <tr>
+                                            <td class="customer"><a href="{% url 'accounting:invoices_view' i.id_inv %}">{{i.customers}}</a></td>
+                                            <td class="lastpay">{{i.last_pay_date|default:'0000/00/00'}}</td>
+                                            <td class="pending">{{i.pay_pending|default:'0'}}</td>
+                                            <td class="subtotal">{{ i.total|default:'0' }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th><strong>$ <samp>0</samp></strong></th>
+                                            <th><strong>$ <samp>0</samp></strong></th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
 
-            </div>
-            <div class="text-right">
-                <a href="{% url 'accounting:account_descripall' %}">View All Transactions <i class="fa fa-arrow-circle-right"></i></a>
-            </div>
         </div>
     </div>
     </div>
