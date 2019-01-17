@@ -27,7 +27,7 @@ body {
     line-height: normal;
 }
 
-@media(max-width:768px) {
+@media(max-width:1300px) {
   .top-nav {
       padding: 10px 15px;
   }
@@ -43,7 +43,7 @@ body {
 
 }
 
-@media(min-width:768px) {
+@media(min-width:1300px) {
     body {
         margin-top: 50px;
      }
@@ -52,8 +52,8 @@ body {
     }
 
     #page-wrapper {
-        top: 100px;
-        padding: 50px 10px 10px 10px;
+        top: 10%;
+        padding: 5% 5% 5% 5%;
         heading: 90%;
     }
 
