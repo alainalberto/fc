@@ -203,12 +203,12 @@ MANAGERS = (
 )
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'ins@firstcallintermodal.com'
+EMAIL_HOST_USER = 'insurance@truckingservice.net'
 EMAIL_HOST_PASSWORD = 'Morton160'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_SUBJECT_PREFIX = 'ERROR-TRUCKING'
+EMAIL_SUBJECT_PREFIX = 'SYSTEM-TRUCKING'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
